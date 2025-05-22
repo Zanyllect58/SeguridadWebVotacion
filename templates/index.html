@@ -71,6 +71,7 @@
       gap: 20px;
     }
 
+    /* Ahora .nav-btn es un <a> estilizado */
     .nav-btn {
       background: transparent;
       border: 2px solid var(--blanco);
@@ -80,6 +81,10 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .nav-btn:hover {
@@ -301,8 +306,8 @@
       </div>
       <button class="hamburger">☰</button>
       <div class="nav-links">
-        <button class="nav-btn">Iniciar Sesión</button>
-        <button class="nav-btn primary">Registrarse</button>
+        <a href="{{ url_for('login') }}" class="nav-btn">Iniciar Sesión</a>
+        <a href="{{ url_for('register') }}" class="nav-btn primary">Registrarse</a>
       </div>
     </div>
   </nav>
@@ -342,50 +347,4 @@
 
   <!-- FOOTER -->
   <footer class="footer">
-    <div class="container">
-      <div class="footer-links">
-        <a href="#">Inicio</a>
-        <a href="#">Candidatos</a>
-        <a href="#">Resultados</a>
-        <a href="#">Contacto</a>
-      </div>
-      <div class="footer-copy">
-        &copy; 2025 Universidad Santo Tomás. Todos los derechos reservados.
-      </div>
-    </div>
-  </footer>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const hamburger = document.querySelector('.hamburger');
-      const navLinks = document.querySelector('.nav-links');
-
-      hamburger.addEventListener('click', () => {
-        navLinks.classList.toggle('active');
-      });
-
-      const loginBtn = document.querySelector('.nav-btn');
-      const registerBtn = document.querySelector('.nav-btn.primary');
-
-      loginBtn.addEventListener('click', () => {
-        alert('Redirigiendo a la página de inicio de sesión...');
-      });
-
-      registerBtn.addEventListener('click', () => {
-        alert('Redirigiendo a la página de registro...');
-      });
-
-      const heroTitle = document.querySelector('.hero h1');
-      const highlightTitle = () => {
-        heroTitle.style.textShadow = '0 0 10px rgba(244, 197, 66, 0.8)';
-        setTimeout(() => {
-          heroTitle.style.textShadow = 'none';
-        }, 1000);
-      };
-
-      setInterval(highlightTitle, 5000);
-      setTimeout(highlightTitle, 2000);
-    });
-  </script>
-</body>
-</html>
+    <div
