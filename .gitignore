@@ -1,0 +1,18 @@
+# Ignorar archivos generados por Python
+__pycache__/   # Carpeta que contiene archivos compilados de Python (.pyc)
+*.py[cod]      # Archivos de bytecode de Python (.pyc, .pyo, .pyd)
+
+# Ignorar directorios de entornos virtuales
+venv/          # Nombre común para entornos virtuales en Python
+env/           # Otro nombre utilizado para entornos virtuales
+
+# Ignorar archivos de configuración y llaves sensibles
+.env           # Archivo que suele contener variables de entorno (ej. credenciales)
+secret.key     # Archivo que puede contener claves secretas o tokens
+log.txt        # Archivos de log que no se necesitan en el repositorio
+
+# Ignorar configuraciones del editor de código
+.vscode/       # Configuración específica de Visual Studio Code
+.idea/         # Configuración específica de IDEs de JetBrains (ej. PyCharm)
+*.swp          # Archivos temporales de edición de Vim
+*.swo          # Archivos de respaldo de Vim
