@@ -15,13 +15,15 @@ from flask_wtf.file import FileField, FileAllowed
 
 
 class LoginForm(FlaskForm): # Formulario de inicio de sesión
-    username = StringField('Usuario', validators=[DataRequired(), Length(min=4, max=50)])
+    #username = StringField('Usuario', validators=[DataRequired(), Length(min=4, max=50)])
+    email = StringField('Eamil', validators=[DataRequired(), Length(min=4, max=50)])
     password = PasswordField('Contraseña', validators=[DataRequired()])
     submit = SubmitField('Iniciar Sesión')
 
 class RegisterForm(FlaskForm):
     identificacion = StringField('Identificación', validators=[DataRequired(), Length(min=5, max=20)])  # NUEVO CAMPO
     username = StringField('Usuario', validators=[DataRequired(), Length(min=4, max=50)])
+    email =  StringField('Email', validators=[DataRequired(), Length(min=4, max=60)])
     password = PasswordField('Contraseña', validators=[DataRequired()])
     submit = SubmitField('Registrar')
 
@@ -29,6 +31,7 @@ class RegisterForm(FlaskForm):
 class EditProfileForm(FlaskForm):
     nombres = StringField('Nombres', validators=[DataRequired(), Length(max=255)])
     apellidos = StringField('Apellidos', validators=[DataRequired(), Length(max=255)])
+    email = StringField('Email', validators=[DataRequired(), Length(max=255)])
     edad = IntegerField('Edad', validators=[NumberRange(min=0, max=120)])
     genero = SelectField('Género', choices=[
         ('masculino', 'Masculino'),

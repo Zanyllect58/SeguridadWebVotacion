@@ -6,13 +6,14 @@ with app.app_context():
 
     # Verifica si ya existe un usuario con ese username o esa identificación
     existing_user = User.query.filter(
-        (User.username == "admin") | (User.identificacion == "000000001")
+        (User.username == "admin") | (User.email == "admin@gmail.com") | (User.identificacion == "000000001")
     ).first()
     
     if not existing_user:
         admin_user = User(
             identificacion="000000001",  # Identificación única para el admin
             username="admin",
+            email="admin@gmail.com",
             role=UserRole.ADMIN
         )
         admin_user.set_password("admin123")

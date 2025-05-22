@@ -19,6 +19,7 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     identificacion = db.Column(db.String(20), nullable=False)
     username = db.Column(db.String(50), unique=True, nullable=False)
+    email = db.Column(db.String(60), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     role = db.Column(db.Enum(UserRole), default=UserRole.CANDIDATO, nullable=False)
 
@@ -43,7 +44,7 @@ class User(db.Model, UserMixin):
 
 class FailedLoginAttempt(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(50), unique=True, nullable=False)
+    email = db.Column(db.String(60), unique=True, nullable=False)
     attempts = db.Column(db.Integer, default=0)
     last_attempt = db.Column(db.Integer, default=0)
 
@@ -58,6 +59,7 @@ class UserProfile(db.Model):
     )
     nombres = db.Column(db.String(255), nullable=True)
     apellidos = db.Column(db.String(255), nullable=True)
+    email = db.Column(db.String(255), nullable=True)
     edad = db.Column(db.Integer, nullable=True)
     genero = db.Column(db.Enum('masculino', 'femenino', 'otro'), nullable=True)
     profile_picture = db.Column(db.String(255), nullable=True)

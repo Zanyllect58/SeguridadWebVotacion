@@ -92,16 +92,16 @@ def login():
             return redirect(url_for('login'))
 
         # Si pasa el reCAPTCHA, continua con el login
-        username = request.form['username']
+        email = request.form['email']
         password = request.form['password']
         
-        user = User.query.filter_by(username=username).first()
-        failed_attempt = FailedLoginAttempt.query.filter_by(username=username).first()
+        user = User.query.filter_by(email=email).first()
+        failed_attempt = FailedLoginAttempt.query.filter_by(email=email).first()
 
         current_time = int(time.time())
 
         if not failed_attempt:
-            failed_attempt = FailedLoginAttempt(username=username, attempts=0, last_attempt=0)
+            failed_attempt = FailedLoginAttempt(email=email, attempts=0, last_attempt=0)
             db.session.add(failed_attempt)
             db.session.commit()
 
