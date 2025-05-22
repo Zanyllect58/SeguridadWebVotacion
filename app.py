@@ -130,6 +130,11 @@ def login():
             flash("Usuario o contraseña incorrectos", "danger")
 
     return render_template('login.html', form=form)
+
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    return render_template('dashboard.html', user=current_user)
 #------------------------------------------
 #            ENDPOINT CREAR
 #------------------------------------------
