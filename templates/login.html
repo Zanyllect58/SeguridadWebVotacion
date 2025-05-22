@@ -5,6 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Formulario de Inicio de Sesión</title>
   <style>
+    :root {
+      --azul: #003366;
+      --azul-claro: #1a4d80;
+      --dorado: #f4c542;
+      --dorado-hover: #ddb316;
+      --blanco: #fff;
+      --gris: #f5f5f5;
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -16,11 +25,17 @@
     }
 
     body {
-      background-color: #f5f5f5;
+      background-color: var(--gris);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    main {
+      flex: 1;
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
       padding: 20px;
     }
 
@@ -39,7 +54,7 @@
     }
 
     .login-header h1 {
-      color: #003366;
+      color: var(--azul);
       font-size: 24px;
       margin-bottom: 8px;
     }
@@ -61,7 +76,7 @@
       display: block;
       margin-bottom: 6px;
       font-size: 14px;
-      color: #003366;
+      color: var(--azul);
       font-weight: 500;
     }
 
@@ -76,7 +91,7 @@
 
     input:focus {
       outline: none;
-      border-color: #003366;
+      border-color: var(--azul);
     }
 
     .password-container {
@@ -91,7 +106,7 @@
       background: none;
       border: none;
       cursor: pointer;
-      color: #003366;
+      color: var(--azul);
     }
 
     .forgot-password {
@@ -101,7 +116,7 @@
 
     .forgot-password a,
     .register-link a {
-      color: #003366;
+      color: var(--azul);
       font-size: 14px;
       text-decoration: none;
     }
@@ -123,14 +138,14 @@
 
     .remember-me label {
       font-size: 14px;
-      color: #003366;
+      color: var(--azul);
     }
 
     .login-button {
       width: 100%;
       padding: 12px;
-      background-color: #f4c542;
-      color: #003366;
+      background-color: var(--dorado);
+      color: var(--azul);
       border: none;
       border-radius: 4px;
       font-size: 16px;
@@ -140,7 +155,7 @@
     }
 
     .login-button:hover {
-      background-color: #ddb316;
+      background-color: var(--dorado-hover);
     }
 
     .register-link {
@@ -164,44 +179,54 @@
     input.invalid {
       border-color: #e53e3e;
     }
+
+    footer {
+      background: var(--azul);
+      color: var(--blanco);
+      text-align: center;
+      padding: 40px 0;
+    }
   </style>
 </head>
 <body>
-  <div class="login-container">
-    <div class="login-header">
-      <h1>Iniciar Sesión</h1>
-      <p>Ingresa tus credenciales para acceder a tu cuenta</p>
-    </div>
-   <form id="loginForm" class="login-form" method="POST" action="{{ url_for('login') }}">
-    {{ form.csrf_token }}
-  
-    <div class="form-group">
-      <label for="email">Correo electrónico</label>
-      {{ form.email(class_="form-control", id="email", placeholder="ejemplo@correo.com") }}
-      <div id="emailError" class="error">Por favor, ingresa un correo electrónico válido</div>
-    </div>
+  {% include 'navbar.html' %}
 
-    <div class="form-group">
-      <label for="password">Contraseña</label>
-      <div class="password-container">
-        {{ form.password(class_="form-control", id="password", placeholder="••••••••") }}
-        <button type="button" class="toggle-password" id="togglePassword">👁️</button>
+  <main>
+    <div class="login-container">
+      <div class="login-header">
+        <h1>Iniciar Sesión</h1>
+        <p>Ingresa tus credenciales para acceder a tu cuenta</p>
       </div>
-      <div id="passwordError" class="error">La contraseña debe tener al menos 6 caracteres</div>
+      <form id="loginForm" class="login-form" method="POST" action="{{ url_for('login') }}">
+        {{ form.csrf_token }}
+        <div class="form-group">
+          <label for="email">Correo electrónico</label>
+          {{ form.email(class_="form-control", id="email", placeholder="ejemplo@correo.com") }}
+          <div id="emailError" class="error">Por favor, ingresa un correo electrónico válido</div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <div class="password-container">
+            {{ form.password(class_="form-control", id="password", placeholder="••••••••") }}
+            <button type="button" class="toggle-password" id="togglePassword">👁️</button>
+          </div>
+          <div id="passwordError" class="error">La contraseña debe tener al menos 6 caracteres</div>
+        </div>
+
+        <div class="forgot-password">
+          <a href="#">¿Olvidaste tu contraseña?</a>
+        </div>
+
+        <!-- Google reCAPTCHA -->
+        <div class="g-recaptcha" data-sitekey="6LcUBSErAAAAADvIZnvrpf6VM9aVU8Nb3iaUoxph"></div>
+
+        <button type="submit" class="login-button">Iniciar Sesión</button>
+      </form>
     </div>
+  </main>
 
-    <div class="forgot-password">
-      <a href="#">¿Olvidaste tu contraseña?</a>
-    </div>
-
-    <!-- Google reCAPTCHA -->
-    <div class="g-recaptcha" data-sitekey="6LcUBSErAAAAADvIZnvrpf6VM9aVU8Nb3iaUoxph"></div>
-
-    <button type="submit" class="login-button">Iniciar Sesión</button>
-
-  </form>
-
-  </div>
+  {% include 'footer.html' %}
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -213,7 +238,7 @@
       const toggleBtn = document.getElementById('togglePassword');
 
       const validateEmail = email =>
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);
 
       function toggleError(input, errorElement, show) {
         errorElement.style.display = show ? 'block' : 'none';
@@ -246,8 +271,7 @@
         toggleError(password, passwordError, !isPasswordValid);
 
         if (isEmailValid && isPasswordValid) {
-          // Enviar el formulario al servidor para ser procesado por Flask
-          form.submit();  // Esto envía el formulario y lo procesa en el servidor
+          form.submit();
         }
       });
     });

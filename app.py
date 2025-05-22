@@ -14,14 +14,6 @@ from flask import send_from_directory
 
 from flask import send_file
 from io import BytesIO
-from openpyxl import Workbook
-
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
-from reportlab.lib.units import cm
-from reportlab.lib import colors
-
-from reportlab.lib.utils import ImageReader
 
 import os
 

@@ -1,0 +1,121 @@
+<!-- templates/navbar.html -->
+<style>
+  .navbar {
+    background: #003366;
+    color: #fff;
+    padding: 1rem 0;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .navbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+  }
+
+  .logo img {
+    height: 40px;
+    margin-right: 10px;
+  }
+
+  .logo-text {
+    font-weight: bold;
+    font-size: 1.2rem;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 20px;
+  }
+
+  .nav-btn {
+    background: transparent;
+    border: 2px solid #fff;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-btn:hover {
+    background: #fff;
+    color: #003366;
+  }
+
+  .nav-btn.primary {
+    background: #f4c542;
+    border-color: #f4c542;
+    color: #003366;
+  }
+
+  .nav-btn.primary:hover {
+    background: #ddb316;
+    border-color: #ddb316;
+  }
+
+  .hamburger {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  @media (max-width: 768px) {
+    .navbar-container {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .hamburger {
+      display: block;
+      position: absolute;
+      right: 20px;
+      top: 20px;
+    }
+
+    .nav-links {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      margin-top: 1rem;
+      gap: 10px;
+    }
+
+    .nav-links.active {
+      display: flex;
+    }
+  }
+</style>
+
+<nav class="navbar">
+  <div class="navbar-container">
+    <div class="logo">
+      <img src="data:image/svg+xml;base64,...svg" alt="Logo USTA" />
+      <span class="logo-text">Universidad Santo Tomás</span>
+    </div>
+    <button class="hamburger">☰</button>
+    <div class="nav-links">
+      <a href="{{ url_for('login') }}" class="nav-btn">Iniciar Sesión</a>
+    </div>
+  </div>
+</nav>
