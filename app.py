@@ -59,9 +59,7 @@ with app.app_context():
 
 
 
-MAX_ATTEMPTS = 3
-BLOCK_TIME = 15
-RECAPTCHA_SECRET_KEY = '6LfzLRsrAAAAALyqQGFcF0LFAHBPavE_lqE0yAhD'  # Clave secreta de reCAPTCHA
+
 
 #------------------------------------------
 #            ENDPOINT BASE
@@ -78,7 +76,7 @@ def login():
     form = LoginForm()
 
     if request.method == 'POST':
-        # Verificación reCAPTCHA
+        # Verificación de reCAPTCHA
         recaptcha_response = request.form.get('g-recaptcha-response')
         payload = {
             'secret': RECAPTCHA_SECRET_KEY,
@@ -95,59 +93,134 @@ def login():
         email = request.form['email']
         password = request.form['password']
         
-        user = User.query.filter_by(email=email).first()
-        failed_attempt = FailedLoginAttempt.query.filter_by(email=email).first()
+        # Manejo de excepciones al buscar usuario y controlar intentos fallidos
+        try:
+            user = User.query.filter_by(email=email).first()
+            failed_attempt = FailedLoginAttempt.query.filter_by(email=email).first()
 
-        current_time = int(time.time())
+            current_time = int(time.time())
 
-        if not failed_attempt:
-            failed_attempt = FailedLoginAttempt(email=email, attempts=0, last_attempt=0)
-            db.session.add(failed_attempt)
-            db.session.commit()
+            if not failed_attempt:
+                failed_attempt = FailedLoginAttempt(email=email, attempts=0, last_attempt=0)
+                db.session.add(failed_attempt)
+                db.session.commit()
 
-        time_since_last_attempt = current_time - failed_attempt.last_attempt
-        if failed_attempt.attempts >= MAX_ATTEMPTS:
-            if time_since_last_attempt < BLOCK_TIME:
-                remaining_time = BLOCK_TIME - time_since_last_attempt
-                flash(f"Demasiados intentos fallidos. Inténtalo en {remaining_time} segundos.", "danger")
-                return redirect(url_for('login'))
-            else:
+            time_since_last_attempt = current_time - failed_attempt.last_attempt
+
+            if failed_attempt.attempts >= MAX_ATTEMPTS:
+                if time_since_last_attempt < BLOCK_TIME:
+                    remaining_time = BLOCK_TIME - time_since_last_attempt
+                    flash(f"Demasiados intentos fallidos. Inténtalo en {remaining_time} segundos.", "danger")
+                    return redirect(url_for('login'))
+                else:
+                    failed_attempt.attempts = 0
+                    failed_attempt.last_attempt = 0
+                    db.session.commit()
+
+            # Verificación de usuario y contraseña
+            if user and user.check_password(password):
+                login_user(user)
+                print("Login exitoso, usuario:", user.username)  # Para verificar
                 failed_attempt.attempts = 0
                 failed_attempt.last_attempt = 0
                 db.session.commit()
+                flash("Inicio de sesión exitoso", "success")
+                return redirect(url_for('dashboard'))
+            else:
+                failed_attempt.attempts += 1
+                failed_attempt.last_attempt = current_time
+                db.session.commit()
+                flash("Usuario o contraseña incorrectos", "danger")
 
-        if user and user.check_password(password):
-            login_user(user)
-            failed_attempt.attempts = 0
-            failed_attempt.last_attempt = 0
-            db.session.commit()
-            flash("Inicio de sesión exitoso", "success")
-            return redirect(url_for('dashboard'))
-        else:
-            failed_attempt.attempts += 1
-            failed_attempt.last_attempt = current_time
-            db.session.commit()
-            flash("Usuario o contraseña incorrectos", "danger")
+        except Exception as e:
+            flash(f"Ocurrió un error: {str(e)}", 'danger')
 
     return render_template('login.html', form=form)
+
+MAX_ATTEMPTS = 3
+BLOCK_TIME = 15
+RECAPTCHA_SECRET_KEY = '6LfzLRsrAAAAALyqQGFcF0LFAHBPavE_lqE0yAhD'  # Clave secreta de reCAPTCHA
 
 @app.route('/dashboard')
 @login_required
 def dashboard():
+    print("Usuario autenticado:", current_user.is_authenticated)  # Para verificar
     return render_template('dashboard.html', user=current_user)
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('Has cerrado sesión exitosamente', 'info')
+    return redirect(url_for('home'))
+
 #------------------------------------------
 #            ENDPOINT CREAR
 #------------------------------------------
 @app.route('/register')
 def register():
-    return render_template('register.html')  
+    return render_template('register.html') 
+
+@app.route('/crear_eleccion', methods=['GET', 'POST'])
+@login_required
+def crear_eleccion():
+    # Lógica para crear una elección
+    return render_template('crear_eleccion.html')  # Asegúrate de tener esta plantilla
+
+
 #------------------------------------------
 #            ENDPOINT LISTAR
 #------------------------------------------
+@app.route('/manage_users', methods=['GET'])
+@login_required
+def manage_users():
+    # Lógica para gestionar usuarios (puedes cargar la lista de usuarios, etc.)
+    return render_template('manage_users.html')  # Asegúrate de tener esta plantilla
+
+@app.route('/lista_elecciones')
+@login_required
+def lista_elecciones():
+    # Lógica para mostrar las elecciones
+    return render_template('lista_elecciones.html')  # Asegúrate de tener esta plantilla
+
+@app.route('/resultados_elecciones')
+@login_required
+def resultados_elecciones():
+    # Lógica para mostrar los resultados de las elecciones
+    return render_template('resultados_elecciones.html')  # Asegúrate de tener esta plantilla
+
 
 #------------------------------------------
 #            ENDPOINT ACTUALIZAR
 #------------------------------------------
+# Ruta para editar perfil
+@app.route('/edit_profile', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    # Lógica aquí para editar el perfil
+    return render_template('edit_profile.html', user=current_user)
+
+# Ruta para editar identificación (si es necesario)
+@app.route('/edit_identificacion', methods=['GET', 'POST'])
+@login_required
+def edit_identificacion():
+    # Lógica aquí para editar la identificación
+    return render_template('edit_identificacion.html', user=current_user)
+
+# Ruta para cambiar la contraseña
+@app.route('/change_password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    if request.method == 'POST':
+        # Lógica para cambiar la contraseña
+        old_password = request.form['old_password']
+        new_password = request.form['new_password']
+        # Aquí deberías implementar la lógica para verificar y actualizar la contraseña
+
+        flash('Contraseña cambiada correctamente', 'success')
+        return redirect(url_for('dashboard'))
+
+    return render_template('change_password.html')  # Asegúrate de tener una plantilla para esta vista
 
 #------------------------------------------
 #            ENDPOINT ELIMINAR
@@ -159,7 +232,17 @@ def register():
 #------------------------------------------
 
 
+@app.route('/logs_identificaciones', methods=['GET'])
+@login_required
+def logs_identificaciones():
+    # Aquí deberías incluir la lógica para mostrar los logs de las identificaciones
+    return render_template('logs_identificaciones.html')  # Asegúrate de tener esta plantilla creada
 
+@app.route('/logs_elecciones', methods=['GET'])
+@login_required
+def logs_elecciones():
+    # Aquí deberías incluir la lógica para mostrar los logs de las elecciones
+    return render_template('logs_elecciones.html')  # Asegúrate de tener esta plantilla creada
 
 #------------------------------------------
 

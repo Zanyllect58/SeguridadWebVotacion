@@ -172,34 +172,38 @@
       <h1>Iniciar Sesión</h1>
       <p>Ingresa tus credenciales para acceder a tu cuenta</p>
     </div>
-    <form id="loginForm" class="login-form">
-      <div class="form-group">
-        <label for="email">Correo electrónico</label>
-        <input type="email" id="email" name="email" placeholder="ejemplo@correo.com" />
-        <div id="emailError" class="error">Por favor, ingresa un correo electrónico válido</div>
+   <form id="loginForm" class="login-form" method="POST" action="{{ url_for('login') }}">
+    {{ form.csrf_token }}
+  
+    <div class="form-group">
+      <label for="email">Correo electrónico</label>
+      {{ form.email(class_="form-control", id="email", placeholder="ejemplo@correo.com") }}
+      <div id="emailError" class="error">Por favor, ingresa un correo electrónico válido</div>
+    </div>
+
+    <div class="form-group">
+      <label for="password">Contraseña</label>
+      <div class="password-container">
+        {{ form.password(class_="form-control", id="password", placeholder="••••••••") }}
+        <button type="button" class="toggle-password" id="togglePassword">👁️</button>
       </div>
-      <div class="form-group">
-        <label for="password">Contraseña</label>
-        <div class="password-container">
-          <input type="password" id="password" name="password" placeholder="••••••••" />
-          <button type="button" class="toggle-password" id="togglePassword">👁️</button>
-        </div>
-        <div id="passwordError" class="error">La contraseña debe tener al menos 6 caracteres</div>
-      </div>
-      <div class="forgot-password">
-        <a href="#">¿Olvidaste tu contraseña?</a>
-      </div>
-      <div class="remember-me">
-        <input type="checkbox" id="remember" name="remember" />
-        <label for="remember">Recordarme</label>
-      </div>
-      <!-- Google reCAPTCHA -->
-      <div class="g-recaptcha" data-sitekey="6LfzLRsrAAAAAMYVIz4o0iFW7tx0TYztS6bfwOmD"></div>
-      <button type="submit" class="login-button">Iniciar Sesión</button>
-      <div class="register-link">
-        ¿No tienes una cuenta? <a href="#">Regístrate</a>
-      </div>
-    </form>
+      <div id="passwordError" class="error">La contraseña debe tener al menos 6 caracteres</div>
+    </div>
+
+    <div class="forgot-password">
+      <a href="#">¿Olvidaste tu contraseña?</a>
+    </div>
+
+    <!-- Google reCAPTCHA -->
+    <div class="g-recaptcha" data-sitekey="6LfzLRsrAAAAAMYVIz4o0iFW7tx0TYztS6bfwOmD"></div>
+
+    <button type="submit" class="login-button">Iniciar Sesión</button>
+
+    <div class="register-link">
+      ¿No tienes una cuenta? <a href="{{ url_for('register') }}">Regístrate</a>
+    </div>
+  </form>
+
   </div>
 
   <script>
@@ -207,7 +211,6 @@
       const form = document.getElementById('loginForm');
       const email = form.email;
       const password = form.password;
-      const remember = form.remember;
       const emailError = document.getElementById('emailError');
       const passwordError = document.getElementById('passwordError');
       const toggleBtn = document.getElementById('togglePassword');
@@ -246,12 +249,8 @@
         toggleError(password, passwordError, !isPasswordValid);
 
         if (isEmailValid && isPasswordValid) {
-          console.log('Iniciando sesión con:', {
-            email: email.value,
-            password: password.value,
-            remember: remember.checked
-          });
-          alert('Formulario enviado correctamente');
+          // Enviar el formulario al servidor para ser procesado por Flask
+          form.submit();  // Esto envía el formulario y lo procesa en el servidor
         }
       });
     });
