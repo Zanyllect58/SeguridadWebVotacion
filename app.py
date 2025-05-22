@@ -13,11 +13,6 @@ from forms import ChangePasswordForm, EditIdentificacionForm, EditProfileForm, E
 from flask import send_from_directory
 
 
-from flask import send_file
-from io import BytesIO
-
-
-
 import os
 
 from forms import CrearEleccionForm
@@ -34,6 +29,14 @@ from forms import VotarForm
 app = Flask(__name__)
 app.config.from_object(Config)
 
+# Habilitar protección CSRF
+csrf = CSRFProtect(app)
+db.init_app(app)
+
+# Configuración de subida de imágenes
+app.config['UPLOADED_PHOTOS_DEST'] = 'uploads/photos'
+photos = UploadSet('photos', IMAGES)
+configure_uploads(app, photos)
 
 # Configurar Flask-Login
 login_manager = LoginManager()
@@ -41,6 +44,17 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 login_manager.login_message = "Debes iniciar sesión para acceder a esta página."
 login_manager.login_message_category = "warning"
+
+@login_manager.user_loader
+def load_user(user_id):
+    return db.session.get(User, int(user_id))
+
+@app.route('/uploads/photos/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOADED_PHOTOS_DEST'], filename)
+
+with app.app_context():
+    db.create_all()
 
 
 
