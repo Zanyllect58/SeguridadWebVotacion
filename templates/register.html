@@ -1,39 +1,22 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Registro de Usuario</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-  
+{% extends "dashboard.html" %}
+
+{% block title %}
+  Registro de Usuario {% if role %} - {{ role|capitalize }} {% endif %}
+{% endblock %}
+
+{% block styles %}
+  {{ super() }}
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body, input, button {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    body {
-      background-color: #f5f5f5;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
-
+    /* Contenedor del formulario para que ocupe todo el espacio disponible */
     .register-container {
-      display: flex;
       background-color: white;
       border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       max-width: 900px;
-      width: 100%;
+      margin: 0 auto;
+      display: flex;
       overflow: hidden;
+      width: 100%;
     }
 
     .register-image {
@@ -41,7 +24,7 @@
       background-image: url('https://images.unsplash.com/photo-1508780709619-79562169bc64?auto=format&fit=crop&w=500&q=80');
       background-size: cover;
       background-position: center;
-      display: none;
+      display: none; /* oculto en móviles */
     }
 
     @media (min-width: 768px) {
@@ -53,6 +36,9 @@
     .register-content {
       flex: 1;
       padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .register-header {
@@ -92,7 +78,7 @@
       transition: border-color 0.3s;
     }
 
-    input:focus {
+    .form-group input:focus {
       outline: none;
       border-color: #003366;
     }
@@ -129,6 +115,7 @@
       text-decoration: underline;
     }
 
+    /* Alerts (ya definidos en dashboard pero por si acaso) */
     .alert {
       margin-bottom: 16px;
       font-size: 14px;
@@ -146,21 +133,24 @@
       color: #721c24;
     }
   </style>
-</head>
-<body>
+{% endblock %}
 
-<div class="register-container">
-  <div class="register-image"></div>
+{% block content %}
+<div class="register-container" role="main" aria-label="Formulario de registro de usuario">
+  <div class="register-image" aria-hidden="true"></div>
+
   <div class="register-content">
     <div class="register-header">
-      <h2>Registro de Usuario</h2>
+      <h2>
+        Registro de Usuario{% if role %} {{ role|capitalize }}{% endif %}
+      </h2>
       <p>Completa tus datos para crear una cuenta</p>
     </div>
 
     <!-- Flash Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
-        <div id="flash-messages">
+        <div id="flash-messages" role="alert" aria-live="polite">
           {% for category, message in messages %}
             <div class="alert alert-{{ category }}">{{ message }}</div>
           {% endfor %}
@@ -168,39 +158,38 @@
       {% endif %}
     {% endwith %}
 
-    <form method="POST">
+    <form method="POST" novalidate>
       {{ form.hidden_tag() }}
 
       <div class="form-group">
-        <label for="identificacion"><i class="fas fa-id-card"></i> Identificación</label>
-        {{ form.identificacion(class="form-control", id="identificacion") }}
+        <label for="identificacion"><i class="fas fa-id-card" aria-hidden="true"></i> Identificación</label>
+        {{ form.identificacion(class="form-control", id="identificacion", required=True, aria_describedby="identificacionHelp") }}
+        <small id="identificacionHelp" class="form-text text-muted">Ingresa tu número de identificación.</small>
       </div>
 
       <div class="form-group">
-        <label for="username"><i class="fas fa-user"></i> Usuario</label>
-        {{ form.username(class="form-control", id="username") }}
+        <label for="username"><i class="fas fa-user" aria-hidden="true"></i> Usuario</label>
+        {{ form.username(class="form-control", id="username", required=True) }}
       </div>
 
       <div class="form-group">
-        <label for="email"><i class="fas fa-envelope"></i> Correo electrónico</label>
-        {{ form.email(class="form-control", id="email") }}
+        <label for="email"><i class="fas fa-envelope" aria-hidden="true"></i> Correo electrónico</label>
+        {{ form.email(class="form-control", id="email", type="email", required=True) }}
       </div>
 
       <div class="form-group">
-        <label for="password"><i class="fas fa-lock"></i> Contraseña</label>
-        {{ form.password(class="form-control", id="password") }}
+        <label for="password"><i class="fas fa-lock" aria-hidden="true"></i> Contraseña</label>
+        {{ form.password(class="form-control", id="password", type="password", required=True) }}
       </div>
 
       <button type="submit" class="register-button">
-        <i class="fas fa-user-plus"></i> Registrarse
+        <i class="fas fa-user-plus" aria-hidden="true"></i> Registrarse
       </button>
     </form>
 
     <div class="back-link">
-      <a href="{{ url_for('dashboard') }}"><i class="fas fa-arrow-left"></i> Volver al inicio</a>
+      <a href="{{ url_for('dashboard') }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> Volver al inicio</a>
     </div>
   </div>
 </div>
-
-</body>
-</html>
+{% endblock %}

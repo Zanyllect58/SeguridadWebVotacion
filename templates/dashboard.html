@@ -1,241 +1,141 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <meta charset="UTF-8" />
+    <title>{% block title %}Dashboard{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
 
     <style>
         body {
             background-color: #f8f9fa;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
-        .navbar-brand {
-            font-weight: bold;
-            font-size: 1.5rem;
-        }
-
-        .card {
-            border-radius: 1rem;
-        }
-
-        .card .img-fluid {
-            border: 4px solid #dee2e6;
-        }
-
-        h2 {
-            font-weight: 600;
-            color: #343a40;
-        }
-
-        .btn {
-            border-radius: 50px;
-            padding: 0.4rem 1rem;
-            font-weight: 500;
-            transition: transform 0.2s ease;
-        }
-
-        .btn:hover {
-            transform: scale(1.03);
-        }
-
-        .btn-primary {
-            background-color: #4a90e2;
-            border-color: #4a90e2;
-        }
-
-        .btn-secondary {
-            background-color: #6c757d;
-            border-color: #6c757d;
-        }
-
-        .btn-danger {
-            background-color: #dc3545;
-            border-color: #dc3545;
-        }
-
-        .btn-success {
-            background-color: #28a745;
-            border-color: #28a745;
-        }
-
-        .btn-outline-info {
-            color: #17a2b8;
-            border-color: #17a2b8;
-        }
-
-        #role-message {
-            border-left: 5px solid #333;
-            border-radius: 0.5rem;
-            padding: 1rem;
-        }
-
-        .alert {
-            border-radius: 0.75rem;
-            font-size: 0.95rem;
-        }
-
-        .container .btn + .btn {
-            margin-left: 0.5rem;
-            margin-top: 0.5rem;
-        }
-
         .sidebar {
             min-width: 250px;
             height: 100vh;
         }
-
         .sidebar .btn {
             text-align: left;
         }
-
         main {
             flex-grow: 1;
         }
+        .profile-picture {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+        }
+        /* Perfil pequeño en navbar */
+        .navbar-profile-img {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+        }
     </style>
+    {% block styles %}{% endblock %}
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand">
-                <img src="./images/Color_Vertical_2.png" height="50px" width="50px" alt="logotipo del sitio">
-            </a>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
 
-            <div class="collapse navbar-collapse">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <span class="nav-link text-warning">Bienvenido, {{ current_user.username }}</span>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link btn btn-warning text-white" href="{{ url_for('edit_profile') }}">Editar Perfil</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link btn btn-info text-white" href="{{ url_for('edit_identificacion') }}">Cambiar Identificación</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link btn btn-info text-white" href="{{ url_for('change_password') }}">Cambiar Contraseña</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link btn btn-danger text-white" href="{{ url_for('logout') }}">Cerrar Sesión</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
+ <!-- Info usuario a la izquierda -->
+<div class="d-flex align-items-center bg-dark bg-opacity-50 rounded px-2 py-1">
+  {% set profile_pic = current_user.profile.profile_picture if current_user.profile and current_user.profile.profile_picture else 'default.jpg' %}
+  <img src="{{ url_for('uploaded_file', filename=profile_pic) }}" 
+       alt="" class="rounded-circle navbar-profile-img shadow-sm border border-light" />
+  <div class="ms-3 text-white">
+    <div class="fw-semibold">{{ current_user.username }}</div>
+    <div class="small text-capitalize text-light-emphasis">{{ current_user.role.value }}</div>
+  </div>
+</div>
+
+
+      <!-- Botón para colapsar en móvil -->
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarActions" 
+        aria-controls="navbarActions" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <!-- Menú a la derecha -->
+      <div class="collapse navbar-collapse justify-content-end" id="navbarActions">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link btn btn-warning text-white mx-1" href="{{ url_for('edit_profile') }}">Editar Perfil</a></li>
+          <li class="nav-item"><a class="nav-link btn btn-info text-white mx-1" href="{{ url_for('edit_identificacion') }}">Cambiar Identificación</a></li>
+          <li class="nav-item"><a class="nav-link btn btn-info text-white mx-1" href="{{ url_for('change_password') }}">Cambiar Contraseña</a></li>
+          <li class="nav-item"><a class="nav-link btn btn-danger text-white mx-1" href="{{ url_for('logout') }}">Cerrar Sesión</a></li>
+        </ul>
+      </div>
+
+    </div>
+  </nav>
+
+  <div class="d-flex">
+    <nav class="sidebar bg-light border-end p-3">
+      <h5 class="fw-bold mb-4">Panel de Acciones</h5>
+      <div class="d-grid gap-2">
+        {% set role = current_user.role.value %}
+        {% if role == 'admin' %}
+   
+
+          <a href="{{ url_for('register', role='candidato') }}" class="btn btn-primary">Registrar Candidato</a>
+          <a href="{{ url_for('register', role='administrativo') }}" class="btn btn-primary">Registrar Administrativo</a>
+          <a href="{{ url_for('register', role='votante') }}" class="btn btn-primary">Registrar Votante</a>
+          <a href="{{ url_for('crear_eleccion') }}" class="btn btn-secondary">Crear Nueva Elección</a>
+          <a href="{{ url_for('lista_elecciones') }}" class="btn btn-secondary">Ver Lista de Elecciones</a>
+          <a href="{{ url_for('listar_usuarios') }}" class="btn btn-secondary">Ver Lista de Usuarios</a>
+          <a href="{{ url_for('resultados_elecciones') }}" class="btn btn-success">Resultados de las Elecciones</a>
+          <a href="{{ url_for('manage_users') }}" class="btn btn-outline-secondary">Gestionar Usuarios</a>
+          <a href="{{ url_for('logs_identificaciones') }}" class="btn btn-outline-info">Ver Cambios de Identificación</a>
+          <a href="{{ url_for('logs_elecciones') }}" class="btn btn-outline-info">Ver Cambios de Elecciones</a>
+
+        {% elif role == 'candidato' %}
+          <a href="{{ url_for('lista_elecciones') }}" class="btn btn-secondary">Ver Lista de Elecciones</a>
+          <a href="{{ url_for('resultados_elecciones') }}" class="btn btn-success">Resultados de las Elecciones</a>
+
+        {% elif role == 'administrativo' %}
+          <a href="{{ url_for('register', role='votante') }}" class="btn btn-primary">Registrar Votante</a>
+          <a href="{{ url_for('lista_elecciones') }}" class="btn btn-secondary">Ver Lista de Elecciones</a>
+          <a href="{{ url_for('listar_usuarios') }}" class="btn btn-secondary">Ver Lista de Usuarios</a>
+
+        {% elif role == 'votante' %}
+          <a href="{{ url_for('votaciones_disponibles') }}" class="btn btn-success">Ver Elecciones Disponibles</a>
+          <a href="{{ url_for('mis_votaciones') }}" class="btn btn-success">🗳️ Mis Votaciones Realizadas</a>
+
+        {% else %}
+          <a href="{{ url_for('lista_elecciones') }}" class="btn btn-secondary">Ver Lista de Elecciones</a>
+        {% endif %}
+      </div>
     </nav>
 
-    <!-- Flash Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    <div id="flash-messages" class="container mt-3">
-        {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-    {% endwith %}
+    <main class="p-4 flex-grow-1">
+      {% block content %}
+      <!-- Contenido específico va aquí -->
+      {% endblock %}
+    </main>
+  </div>
 
-    <div class="d-flex">
-        <!-- Sidebar -->
-        <nav class="sidebar bg-light border-end p-3">
-            <h5 class="fw-bold mb-4">Panel de Acciones</h5>
-            <div class="d-grid gap-2">
-                <a href="{{ url_for('register', role='candidato') }}" class="btn btn-primary">Registrar Candidato</a>
-                <a href="{{ url_for('register', role='administrativo') }}" class="btn btn-primary">Registrar Administrativo</a>
-                <a href="{{ url_for('register', role='votante') }}" class="btn btn-primary">Registrar Votante</a>
-                <a href="{{ url_for('crear_eleccion') }}" class="btn btn-secondary">Crear Nueva Elección</a>
-                <a href="{{ url_for('lista_elecciones') }}" class="btn btn-secondary">Ver Lista de Elecciones</a>
-                <a href="{{ url_for('resultados_elecciones') }}" class="btn btn-success">Resultados de las Elecciones</a>
-            </div>
-        </nav>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const alerts = document.querySelectorAll('#flash-messages .alert');
+      alerts.forEach(alert => {
+        setTimeout(() => {
+          let opacity = 1;
+          const fadeEffect = setInterval(() => {
+            if (opacity <= 0) {
+              clearInterval(fadeEffect);
+              alert.remove();
+            } else {
+              opacity -= 0.1;
+              alert.style.opacity = opacity;
+            }
+          }, 25);
+        }, 3000);
+      });
+    });
+  </script>
 
-        <!-- Main Content -->
-        <main class="p-4">
-            <div class="d-flex flex-column flex-md-row justify-content-start align-items-center mb-4">
-                <div class="card border-0 shadow-sm p-2 me-3" style="max-width: 220px;">
-                    <div class="text-center">
-                        {% if current_user.profile and current_user.profile.profile_picture %}
-                            <img src="{{ url_for('uploaded_file', filename=current_user.profile.profile_picture) }}" alt="Foto de perfil" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover;">
-                        {% else %}
-                            <img src="{{ url_for('uploaded_file', filename='default.jpg') }}" alt="Sin foto" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover;">
-                        {% endif %}
-                        <p class="mt-2 mb-0 fw-bold">
-                            Hola,<br>
-                            {% if current_user.profile and (current_user.profile.nombres or current_user.profile.apellidos) %}
-                                {{ current_user.profile.nombres }} {{ current_user.profile.apellidos }}
-                            {% else %}
-                                {{ current_user.username }}
-                            {% endif %}
-                        </p>
-                    </div>
-                </div>
-                <div>
-                    <h2>Bienvenido al Panel de Control</h2>
-                    <p>Has iniciado sesión como <strong>{{ current_user.username }}</strong>.</p>
-                </div>
-            </div>
-
-            <!-- Mensaje por rol -->
-            {% if current_user.role.value == 'admin' %}
-            <div class="alert alert-success" id="role-message">
-                <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-2">
-                    <div>
-                        <strong>Modo Administrador:</strong> Tienes permisos de administrador.
-                    </div>
-                    <div class="d-flex gap-2">
-                        <a href="{{ url_for('manage_users') }}" class="btn btn-outline-secondary">Gestionar Usuarios</a>
-                        <a href="{{ url_for('logs_identificaciones') }}" class="btn btn-outline-info">Ver Cambios de Identificación</a>
-                        <a href="{{ url_for('logs_elecciones') }}" class="btn btn-outline-info">Ver cambios de elecciones</a>
-                    </div>
-                </div>
-            </div>
-            {% elif current_user.role.value == 'candidato' %}
-            <div class="alert alert-primary" id="role-message">
-                <strong>Modo Candidato:</strong> Puedes participar como postulante a ser elegido.
-            </div>
-            {% elif current_user.role.value == 'administrativo' %}
-            <div class="alert alert-warning" id="role-message">
-                <strong>Modo Administrativo:</strong> Puedes apoyar la gestión operativa de las elecciones.
-            </div>
-            {% elif current_user.role.value == 'votante' %}
-            <div class="alert alert-info" id="role-message">
-                <strong>Modo Votante:</strong> Puedes participar realizando tu votación.
-            </div>
-            <a href="{{ url_for('votaciones_disponibles') }}" class="btn btn-success">Ver Elecciones Disponibles</a>
-            <a href="{{ url_for('mis_votaciones') }}" class="btn btn-success">🗳️ Mis Votaciones Realizadas</a>
-            {% else %}
-            <div class="alert alert-secondary" id="role-message">
-                <strong>Modo Usuario:</strong> No tienes privilegios administrativos.
-            </div>
-            {% endif %}
-        </main>
-    </div>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            let alerts = document.querySelectorAll('#flash-messages .alert');
-            alerts.forEach(alert => {
-                setTimeout(() => {
-                    let fadeEffect = setInterval(() => {
-                        if (!alert.style.opacity) {
-                            alert.style.opacity = 1;
-                        }
-                        if (alert.style.opacity > 0) {
-                            alert.style.opacity -= 0.1;
-                        } else {
-                            clearInterval(fadeEffect);
-                            alert.remove();
-                        }
-                    }, 25);
-                }, 3000);
-            });
-        });
-    </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  {% block scripts %}{% endblock %}
 </body>
 </html>

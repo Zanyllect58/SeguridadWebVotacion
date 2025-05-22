@@ -35,6 +35,7 @@ app.config.from_object(Config)
 csrf = CSRFProtect(app)
 db.init_app(app)
 
+
 # Configuración de subida de imágenes
 app.config['UPLOADED_PHOTOS_DEST'] = 'uploads/photos'
 photos = UploadSet('photos', IMAGES)
@@ -147,7 +148,8 @@ RECAPTCHA_SECRET_KEY = '6LcUBSErAAAAAJm6VFJwH5cDPQvYGrFivu7_ef8T'  # Clave secre
 @login_required
 def dashboard():
     print("Usuario autenticado:", current_user.is_authenticated)  # Para verificar
-    return render_template('dashboard.html', user=current_user)
+    role = request.args.get('role', None)  # Por ejemplo, si lo recibes por query string
+    return render_template('dashboard.html', user=current_user,  role=role)
 
 @app.route('/logout')
 @login_required
@@ -218,10 +220,41 @@ def manage_users():
     # Lógica para gestionar usuarios (puedes cargar la lista de usuarios, etc.)
     return render_template('manage_users.html')  # Asegúrate de tener esta plantilla
 
-@app.route('/lista_elecciones')
+@app.route('/listar_usuarios')
+@login_required
+def listar_usuarios():
+    usuarios = User.query.all()
+    
+    usuarios_serializados = []
+    for u in usuarios:
+        usuario_dict = {
+            'id': u.id,
+            'identificacion': u.identificacion,
+            'username': u.username,
+            'email': u.email,
+            'role': u.role.value,  # Serializamos el Enum como string legible
+        }
+        
+        if u.profile:
+            usuario_dict['profile'] = {
+                'nombres': u.profile.nombres,
+                'apellidos': u.profile.apellidos,
+                'email': u.profile.email,
+                'edad': u.profile.edad,
+                'genero': u.profile.genero,
+            }
+        else:
+            usuario_dict['profile'] = None
+
+        usuarios_serializados.append(usuario_dict)
+
+    return render_template('listar_usuarios.html', usuarios=usuarios_serializados)
+
+
+@app.route('/lista_elecciones', methods=['GET'])
 @login_required
 def lista_elecciones():
-    # Lógica para mostrar las elecciones
+    # Lógica para gestionar usuarios (puedes cargar la lista de usuarios, etc.)
     return render_template('lista_elecciones.html')  # Asegúrate de tener esta plantilla
 
 @app.route('/resultados_elecciones')

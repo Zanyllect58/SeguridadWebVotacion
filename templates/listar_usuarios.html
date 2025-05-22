@@ -1,0 +1,284 @@
+{% extends "dashboard.html" %}
+
+{% block title %}Lista de Usuarios{% endblock %}
+
+{% block styles %}
+<style>
+    input[type="text"] {
+        padding: 10px;
+        margin-bottom: 15px;
+        width: 100%;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 10px;
+    }
+    thead {
+        background-color: #007bff;
+        color: white;
+    }
+    th, td {
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        text-align: left;
+    }
+    tbody tr:hover {
+        background-color: #f1f1f1;
+        cursor: pointer;
+    }
+    th.sortable:hover {
+        cursor: pointer;
+        background-color: #0056b3;
+    }
+    button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 7px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-right: 5px;
+    }
+    button:hover {
+        background-color: #0056b3;
+    }
+    #noData {
+        text-align: center;
+        color: #999;
+        margin-top: 15px;
+    }
+    /* Modal Styles */
+    .modal {
+        display: none; 
+        position: fixed; 
+        z-index: 100; 
+        left: 0; top: 0;
+        width: 100%; height: 100%; 
+        overflow: auto; 
+        background-color: rgba(0,0,0,0.4);
+    }
+    .modal-content {
+        background-color: #fefefe;
+        margin: 80px auto;
+        padding: 20px;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    .modal-header, .modal-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .modal-header h2 {
+        margin: 0;
+    }
+    .modal-footer button {
+        padding: 8px 14px;
+    }
+    .modal-footer .close-btn {
+        background-color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <h1 class="mb-4">Usuarios Registrados</h1>
+
+    <input type="text" id="searchInput" placeholder="Buscar por cualquier campo..." class="form-control mb-3" />
+
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th class="sortable" data-column="id">ID</th>
+                <th class="sortable" data-column="username">Usuario</th>
+                <th class="sortable" data-column="email">Email</th>
+                <th class="sortable" data-column="identificacion">Identificación</th>
+                <th class="sortable" data-column="role">Rol</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
+
+    <div id="noData" style="display:none;">No hay datos disponibles</div>
+
+    <!-- Modal -->
+    <div id="formModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Usuario</h2>
+                <button id="closeModalBtn" class="btn-close"></button>
+            </div>
+            <form id="userForm">
+                <input type="hidden" id="userId" />
+                <div class="mb-3">
+                    <label for="username" class="form-label">Usuario</label>
+                    <input type="text" id="username" class="form-control" required />
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" id="email" class="form-control" required />
+                </div>
+                <div class="mb-3">
+                    <label for="identificacion" class="form-label">Identificación</label>
+                    <input type="text" id="identificacion" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label for="role" class="form-label">Rol</label>
+                    <select id="role" class="form-select" required>
+                        <option value="admin">Administrador</option>
+                        <option value="candidato">Candidato</option>
+                        <option value="administrativo">Administrativo</option>
+                        <option value="votante">Votante</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="cancelBtn" class="btn btn-secondary">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+ 
+    const users = {{ usuarios | tojson }};
+    
+    console.log(users);  // Ahora funcionará correctamente sin errores de serialización
+    
+    const tableBody = document.getElementById('tableBody');
+    const searchInput = document.getElementById('searchInput');
+    const noData = document.getElementById('noData');
+    const modal = document.getElementById('formModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const userForm = document.getElementById('userForm');
+
+    let currentSortColumn = null;
+    let currentSortOrder = 'asc';
+    let filteredUsers = [...users];
+
+    function renderTable(data) {
+        tableBody.innerHTML = '';
+        if (data.length === 0) {
+            noData.style.display = 'block';
+            return;
+        }
+        noData.style.display = 'none';
+
+        data.forEach(user => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${user.id}</td>
+                <td>${user.username}</td>
+                <td>${user.email}</td>
+                <td>${user.identificacion}</td>
+                <td>${user.role}</td>
+                <td>
+                    <button class="edit-btn btn btn-sm btn-primary" data-id="${user.id}">Editar</button>
+                </td>
+            `;
+            tableBody.appendChild(tr);
+        });
+
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = parseInt(e.target.dataset.id);
+                openModal(id);
+            });
+        });
+    }
+
+    function sortTable(column) {
+        if (currentSortColumn === column) {
+            currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSortColumn = column;
+            currentSortOrder = 'asc';
+        }
+
+        filteredUsers.sort((a, b) => {
+            if (a[column] < b[column]) return currentSortOrder === 'asc' ? -1 : 1;
+            if (a[column] > b[column]) return currentSortOrder === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+        renderTable(filteredUsers);
+    }
+
+    function filterTable(term) {
+        term = term.toLowerCase();
+        filteredUsers = users.filter(user => {
+            return Object.values(user).some(value =>
+                String(value).toLowerCase().includes(term)
+            );
+        });
+        renderTable(filteredUsers);
+    }
+
+    function openModal(id) {
+        const user = users.find(u => u.id === id);
+        if (!user) return;
+
+        document.getElementById('userId').value = user.id;
+        document.getElementById('username').value = user.username;
+        document.getElementById('email').value = user.email;
+        document.getElementById('identificacion').value = user.identificacion;
+        document.getElementById('role').value = user.role;
+
+        modal.style.display = 'block';
+    }
+
+    function closeModal() {
+        modal.style.display = 'none';
+        userForm.reset();
+    }
+
+    searchInput.addEventListener('input', (e) => {
+        filterTable(e.target.value);
+    });
+
+    document.querySelectorAll('th.sortable').forEach(th => {
+        th.addEventListener('click', () => {
+            sortTable(th.dataset.column);
+        });
+    });
+
+    closeModalBtn.addEventListener('click', closeModal);
+    cancelBtn.addEventListener('click', closeModal);
+
+    userForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const id = parseInt(document.getElementById('userId').value);
+        const index = users.findIndex(u => u.id === id);
+        if (index !== -1) {
+            users[index].username = document.getElementById('username').value;
+            users[index].email = document.getElementById('email').value;
+            users[index].identificacion = document.getElementById('identificacion').value;
+            users[index].role = document.getElementById('role').value;
+            filterTable(searchInput.value);
+            closeModal();
+            alert('Usuario actualizado correctamente.');
+        }
+    });
+
+    // Inicializa tabla
+    renderTable(users);
+
+    window.onclick = function(event) {
+        if (event.target === modal) {
+            closeModal();
+        }
+    };
+
+</script>
+{% endblock %}
