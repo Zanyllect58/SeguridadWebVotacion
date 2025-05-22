@@ -167,9 +167,48 @@ def logout():
 #------------------------------------------
 #            ENDPOINT CREAR
 #------------------------------------------
-@app.route('/register')
-def register():
-    return render_template('register.html') 
+
+@app.route('/register/<role>', methods=['GET', 'POST'])
+@login_required
+def register(role):
+    if current_user.role != UserRole.ADMIN:
+        flash("No tienes permisos para crear usuarios.", "danger")
+        return redirect(url_for('dashboard'))
+    
+    form = RegisterForm()
+    if form.validate_on_submit():
+        email = form.email.data
+        username = form.username.data
+        password = form.password.data
+        identificacion = form.identificacion.data
+
+        # Verificar si ya existe un usuario con el mismo nombre de usuario
+        if User.query.filter_by(username=username).first():
+            flash("El usuario ya existe", "danger")
+            return redirect(url_for('register', role=role))
+
+        # Verificar si ya existe un usuario con la misma identificación en el mismo rol
+        if User.query.filter_by(identificacion=identificacion, role=role).first():
+            flash("Ya existe un usuario con esta identificación en el mismo rol.", "danger")
+            return redirect(url_for('register', role=role))
+
+        # Verificar que el rol sea válido
+        if role not in ["administrativo", "candidato", "votante"]:
+            flash("Rol inválido", "danger")
+            return redirect(url_for('home'))
+
+        # Crear nuevo usuario
+        new_user = User(email=email, username=username, identificacion=identificacion, role=role)
+        new_user.set_password(password)
+
+        db.session.add(new_user)
+        db.session.commit()
+
+        flash("Usuario registrado con éxito", "success")
+        return redirect(url_for('login'))
+
+    return render_template('register.html', form=form, role=role)
+
 
 @app.route('/crear_eleccion', methods=['GET', 'POST'])
 @login_required
