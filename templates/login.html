@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Formulario de Inicio de Sesión</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body, input, button {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .login-container {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+      overflow: hidden;
+    }
+
+    .login-header {
+      padding: 24px;
+      text-align: center;
+    }
+
+    .login-header h1 {
+      color: #333;
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .login-header p {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .login-form {
+      padding: 0 24px 24px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      color: #333;
+      font-weight: 500;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #4f46e5;
+    }
+
+    .password-container {
+      position: relative;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #666;
+    }
+
+    .forgot-password {
+      text-align: right;
+      margin-bottom: 16px;
+    }
+
+    .forgot-password a,
+    .register-link a {
+      color: #4f46e5;
+      font-size: 14px;
+      text-decoration: none;
+    }
+
+    .forgot-password a:hover,
+    .register-link a:hover {
+      text-decoration: underline;
+    }
+
+    .remember-me {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .remember-me input {
+      margin-right: 8px;
+    }
+
+    .remember-me label {
+      font-size: 14px;
+      color: #333;
+    }
+
+    .login-button {
+      width: 100%;
+      padding: 12px;
+      background-color: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .login-button:hover {
+      background-color: #4338ca;
+    }
+
+    .register-link {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .error {
+      color: #e53e3e;
+      font-size: 12px;
+      margin-top: 4px;
+      display: none;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    input.invalid {
+      border-color: #e53e3e;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-header">
+      <h1>Iniciar Sesión</h1>
+      <p>Ingresa tus credenciales para acceder a tu cuenta</p>
+    </div>
+    <form id="loginForm" class="login-form">
+      <div class="form-group">
+        <label for="email">Correo electrónico</label>
+        <input type="email" id="email" name="email" placeholder="ejemplo@correo.com" />
+        <div id="emailError" class="error">Por favor, ingresa un correo electrónico válido</div>
+      </div>
+      <div class="form-group">
+        <label for="password">Contraseña</label>
+        <div class="password-container">
+          <input type="password" id="password" name="password" placeholder="••••••••" />
+          <button type="button" class="toggle-password" id="togglePassword">👁️</button>
+        </div>
+        <div id="passwordError" class="error">La contraseña debe tener al menos 6 caracteres</div>
+      </div>
+      <div class="forgot-password">
+        <a href="#">¿Olvidaste tu contraseña?</a>
+      </div>
+      <div class="remember-me">
+        <input type="checkbox" id="remember" name="remember" />
+        <label for="remember">Recordarme</label>
+      </div>
+      <button type="submit" class="login-button">Iniciar Sesión</button>
+      <div class="register-link">
+        ¿No tienes una cuenta? <a href="#">Regístrate</a>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('loginForm');
+      const email = form.email;
+      const password = form.password;
+      const remember = form.remember;
+      const emailError = document.getElementById('emailError');
+      const passwordError = document.getElementById('passwordError');
+      const toggleBtn = document.getElementById('togglePassword');
+
+      const validateEmail = email =>
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+      function toggleError(input, errorElement, show) {
+        errorElement.style.display = show ? 'block' : 'none';
+        input.classList.toggle('invalid', show);
+      }
+
+      toggleBtn.addEventListener('click', () => {
+        const isPassword = password.type === 'password';
+        password.type = isPassword ? 'text' : 'password';
+        toggleBtn.textContent = isPassword ? '🔒' : '👁️';
+      });
+
+      email.addEventListener('input', () => {
+        const showError = email.value && !validateEmail(email.value);
+        toggleError(email, emailError, showError);
+      });
+
+      password.addEventListener('input', () => {
+        const showError = password.value && password.value.length < 6;
+        toggleError(password, passwordError, showError);
+      });
+
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+
+        const isEmailValid = validateEmail(email.value);
+        const isPasswordValid = password.value.length >= 6;
+
+        toggleError(email, emailError, !isEmailValid);
+        toggleError(password, passwordError, !isPasswordValid);
+
+        if (isEmailValid && isPasswordValid) {
+          console.log('Iniciando sesión con:', {
+            email: email.value,
+            password: password.value,
+            remember: remember.checked
+          });
+          alert('Formulario enviado correctamente');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

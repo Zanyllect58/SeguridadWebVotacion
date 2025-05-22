@@ -36,7 +36,15 @@ from forms import AgregarCandidaturaForm
 from forms import VotarForm
 
 
+app = Flask(__name__)
+app.config.from_object(Config)
 
+#------------------------------------------
+#            ENDPOINT BASE
+#------------------------------------------
+@app.route('/')
+def home():
+   return render_template('index.html')
 #------------------------------------------
 #            ENDPOINT CREAR
 #------------------------------------------
