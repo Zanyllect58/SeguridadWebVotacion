@@ -139,7 +139,7 @@ def login():
 
 MAX_ATTEMPTS = 3
 BLOCK_TIME = 15
-RECAPTCHA_SECRET_KEY = '6LfzLRsrAAAAALyqQGFcF0LFAHBPavE_lqE0yAhD'  # Clave secreta de reCAPTCHA
+RECAPTCHA_SECRET_KEY = '6LcUBSErAAAAAJm6VFJwH5cDPQvYGrFivu7_ef8T'  # Clave secreta de reCAPTCHA
 
 @app.route('/dashboard')
 @login_required
