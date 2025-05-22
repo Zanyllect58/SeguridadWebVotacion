@@ -34,12 +34,88 @@ from forms import VotarForm
 app = Flask(__name__)
 app.config.from_object(Config)
 
+
+# Configurar Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+login_manager.login_message = "Debes iniciar sesión para acceder a esta página."
+login_manager.login_message_category = "warning"
+
+
+
+
+MAX_ATTEMPTS = 3
+BLOCK_TIME = 15
+RECAPTCHA_SECRET_KEY = '6LfzLRsrAAAAALyqQGFcF0LFAHBPavE_lqE0yAhD'  # Clave secreta de reCAPTCHA
+
 #------------------------------------------
 #            ENDPOINT BASE
 #------------------------------------------
 @app.route('/')
 def home():
    return render_template('index.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+
+    form = LoginForm()
+
+    if request.method == 'POST':
+        # Verificación reCAPTCHA
+        recaptcha_response = request.form.get('g-recaptcha-response')
+        payload = {
+            'secret': RECAPTCHA_SECRET_KEY,
+            'response': recaptcha_response
+        }
+        r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=payload)
+        result = r.json()
+
+        if not result.get('success'):
+            flash('reCAPTCHA falló. Inténtalo de nuevo.', 'danger')
+            return redirect(url_for('login'))
+
+        # Si pasa el reCAPTCHA, continua con el login
+        username = request.form['username']
+        password = request.form['password']
+        
+        user = User.query.filter_by(username=username).first()
+        failed_attempt = FailedLoginAttempt.query.filter_by(username=username).first()
+
+        current_time = int(time.time())
+
+        if not failed_attempt:
+            failed_attempt = FailedLoginAttempt(username=username, attempts=0, last_attempt=0)
+            db.session.add(failed_attempt)
+            db.session.commit()
+
+        time_since_last_attempt = current_time - failed_attempt.last_attempt
+        if failed_attempt.attempts >= MAX_ATTEMPTS:
+            if time_since_last_attempt < BLOCK_TIME:
+                remaining_time = BLOCK_TIME - time_since_last_attempt
+                flash(f"Demasiados intentos fallidos. Inténtalo en {remaining_time} segundos.", "danger")
+                return redirect(url_for('login'))
+            else:
+                failed_attempt.attempts = 0
+                failed_attempt.last_attempt = 0
+                db.session.commit()
+
+        if user and user.check_password(password):
+            login_user(user)
+            failed_attempt.attempts = 0
+            failed_attempt.last_attempt = 0
+            db.session.commit()
+            flash("Inicio de sesión exitoso", "success")
+            return redirect(url_for('dashboard'))
+        else:
+            failed_attempt.attempts += 1
+            failed_attempt.last_attempt = current_time
+            db.session.commit()
+            flash("Usuario o contraseña incorrectos", "danger")
+
+    return render_template('login.html', form=form)
 #------------------------------------------
 #            ENDPOINT CREAR
 #------------------------------------------
