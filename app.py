@@ -207,8 +207,26 @@ def register(role):
 @app.route('/crear_eleccion', methods=['GET', 'POST'])
 @login_required
 def crear_eleccion():
-    # Lógica para crear una elección
-    return render_template('crear_eleccion.html')  # Asegúrate de tener esta plantilla
+    if current_user.role != UserRole.ADMIN:
+        flash("Solo los administradores pueden crear elecciones.", "danger")
+        return redirect(url_for('dashboard'))
+
+    form = CrearEleccionForm()
+    if form.validate_on_submit():
+        nueva_eleccion = Eleccion(
+            nombre=form.nombre.data,
+            descripcion=form.descripcion.data,
+            tipo_representacion=form.tipo_representacion.data,
+            fecha_inicio=form.fecha_inicio.data,
+            fecha_fin=form.fecha_fin.data,
+            estado='programada'
+        )
+        db.session.add(nueva_eleccion)
+        db.session.commit()
+        flash("Elección creada exitosamente.", "success")
+        return redirect(url_for('dashboard'))
+
+    return render_template('crear_eleccion.html', form=form)
 
 
 #------------------------------------------
