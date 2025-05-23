@@ -264,12 +264,52 @@ def listar_usuarios():
     return render_template('listar_usuarios.html', usuarios=usuarios_serializados)
 
 
-@app.route('/lista_elecciones', methods=['GET'])
+@app.route('/elecciones')
 @login_required
 def lista_elecciones():
+    if current_user.role != UserRole.ADMIN:
+        flash("Acceso denegado.", "danger")
+        return redirect(url_for('dashboard'))
+
+    now = datetime.now()
     elecciones = Eleccion.query.all()
-    role = current_user.role  # o donde tengas el rol del usuario
-    return render_template("ver_elecciones.html", elecciones=elecciones, role=role)
+    cambios = 0
+
+    # Actualizar el estado de las elecciones
+    for e in elecciones:
+        if e.fecha_inicio <= now <= e.fecha_fin and e.estado != 'activa':
+            e.estado = 'activa'
+            cambios += 1
+        elif now > e.fecha_fin and e.estado != 'finalizada':
+            e.estado = 'finalizada'
+            cambios += 1
+        elif now < e.fecha_inicio and e.estado != 'programada':
+            e.estado = 'programada'
+            cambios += 1
+
+    if cambios > 0:
+        db.session.commit()
+
+    # Obtener parámetros de búsqueda y filtros
+    tipo = request.args.get('tipo', '').strip()
+    estado = request.args.get('estado', '').strip()
+    busqueda = request.args.get('busqueda', '').strip()
+
+    # Aplicar filtros
+    query = Eleccion.query
+
+    if tipo:
+        query = query.filter(Eleccion.tipo_representacion == tipo)
+
+    if estado:
+        query = query.filter(Eleccion.estado == estado)
+
+    if busqueda:
+        query = query.filter(Eleccion.nombre.ilike(f"%{busqueda}%"))
+
+    elecciones = query.order_by(desc(Eleccion.fecha_inicio)).all()
+
+    return render_template('ver_elecciones.html', elecciones=elecciones)
 
 @app.route('/resultados_elecciones')
 @login_required
