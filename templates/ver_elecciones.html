@@ -86,7 +86,11 @@
   <div class="container">
     {% for eleccion in elecciones %}
       <div class="card">
-        <h3>{{ eleccion.nombre }}</h3>
+        <div style="text-align: center;">
+          <h3>{{ eleccion.nombre }}</h3>
+       </div>
+        
+       
         <p><span class="label">Descripción:</span> {{ eleccion.descripcion }}</p>
         <p><span class="label">Tipo de Representación:</span> {{ eleccion.tipo_representacion }}</p>
         <p><span class="label">Fecha de Inicio:</span> {{ eleccion.fecha_inicio.strftime('%Y-%m-%d') }}</p>
@@ -94,19 +98,21 @@
         <p><span class="label">Estado:</span> {{ eleccion.estado }}</p>
         <p><span class="label">Creado:</span> {{ eleccion.createdAt.strftime('%Y-%m-%d') }}</p>
         <p><span class="label">Última actualización:</span> {{ eleccion.updatedAt.strftime('%Y-%m-%d') }}</p>
+        
+       
+            <div class="buttons" style="display: flex; justify-content: center; gap: 10px;">
+              {% if role == 'admin' %}
+                <a href="{{ url_for('editar_eleccion', eleccion_id=eleccion.id) }}">
+                  <button class="edit-btn">Editar</button>
+                </a>
+              {% elif role != 'admin' %}
 
-        <div class="buttons">
-          {% if role == 'admin' %}
-            <a href="{{ url_for('editar_eleccion', eleccion_id=eleccion.id) }}">
-              <button class="edit-btn">Editar</button>
-            </a>
-          {% elif role != 'admin' %}
-
-          <a href="{{ url_for('votar', eleccion_id=eleccion.id) }}">
-            <button class="vote-btn">Votar</button>
-          </a>
-          {% endif %}
-        </div>
+              <a href="{{ url_for('votar', eleccion_id=eleccion.id) }}">
+                <button class="vote-btn">Votar</button>
+              </a>
+              {% endif %}
+            </div>
+        
       </div>
     {% endfor %}
   </div>
