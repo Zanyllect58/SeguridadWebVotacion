@@ -97,7 +97,7 @@
 
         <div class="buttons">
           {% if role == 'admin' %}
-            <a href="{{ url_for('editar_eleccion', id=eleccion.id) }}">
+            <a href="{{ url_for('editar_eleccion', eleccion_id=eleccion.id) }}">
               <button class="edit-btn">Editar</button>
             </a>
           {% endif %}
