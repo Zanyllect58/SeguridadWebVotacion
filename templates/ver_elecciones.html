@@ -1,0 +1,113 @@
+{% extends "dashboard.html" %}
+
+{% block title %}
+  Registro de Usuario {% if role %} - {{ role|capitalize }} {% endif %}
+{% endblock %}
+
+{% block styles %}
+  {{ super() }}
+  <style>
+ .container {
+  display: flex;
+  gap: 2%;
+  flex-wrap: wrap;
+}
+
+
+
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .card {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 16px;
+      width: 32%;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .card h3 {
+      margin-top: 0;
+      color: #333;
+    }
+
+    .card p {
+      margin: 4px 0;
+    }
+
+    .label {
+      font-weight: bold;
+    }
+    .buttons {
+      margin-top: 12px;
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .vote-btn {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .edit-btn {
+      background-color: #28a745;
+      color: white;
+    }
+
+
+.item:nth-child(1),
+.item:nth-child(2),
+.item:nth-child(3),
+.item:nth-child(4),
+.item:nth-child(5),
+.item:nth-child(6),
+.item:nth-child(7),
+.item:nth-child(8),
+.item:nth-child(9) {
+  width: 32%;
+  height: 32%;
+}
+  </style>
+  {% endblock %}
+  {% block content %}
+  <div class="container">
+    {% for eleccion in elecciones %}
+      <div class="card">
+        <h3>{{ eleccion.nombre }}</h3>
+        <p><span class="label">Descripción:</span> {{ eleccion.descripcion }}</p>
+        <p><span class="label">Tipo de Representación:</span> {{ eleccion.tipo_representacion }}</p>
+        <p><span class="label">Fecha de Inicio:</span> {{ eleccion.fecha_inicio.strftime('%Y-%m-%d') }}</p>
+        <p><span class="label">Fecha de Fin:</span> {{ eleccion.fecha_fin.strftime('%Y-%m-%d') }}</p>
+        <p><span class="label">Estado:</span> {{ eleccion.estado }}</p>
+        <p><span class="label">Creado:</span> {{ eleccion.createdAt.strftime('%Y-%m-%d') }}</p>
+        <p><span class="label">Última actualización:</span> {{ eleccion.updatedAt.strftime('%Y-%m-%d') }}</p>
+
+        <div class="buttons">
+          {% if role == 'admin' %}
+            <a href="{{ url_for('editar_eleccion', id=eleccion.id) }}">
+              <button class="edit-btn">Editar</button>
+            </a>
+          {% endif %}
+          <a href="{{ url_for('votar_eleccion', id=eleccion.id) }}">
+            <button class="vote-btn">Votar</button>
+          </a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}
+
+  

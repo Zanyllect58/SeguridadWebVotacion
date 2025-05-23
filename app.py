@@ -254,14 +254,16 @@ def listar_usuarios():
 @app.route('/lista_elecciones', methods=['GET'])
 @login_required
 def lista_elecciones():
-    # Lógica para gestionar usuarios (puedes cargar la lista de usuarios, etc.)
-    return render_template('lista_elecciones.html')  # Asegúrate de tener esta plantilla
+    elecciones = Eleccion.query.all()
+    role = current_user.role  # o donde tengas el rol del usuario
+    return render_template("ver_elecciones.html", elecciones=elecciones, role=role)
 
 @app.route('/resultados_elecciones')
 @login_required
 def resultados_elecciones():
     # Lógica para mostrar los resultados de las elecciones
     return render_template('resultados_elecciones.html')  # Asegúrate de tener esta plantilla
+
 
 
 #------------------------------------------
