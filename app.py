@@ -264,6 +264,7 @@ def listar_usuarios():
     return render_template('listar_usuarios.html', usuarios=usuarios_serializados)
 
 
+# Ruta para ver la lista de elecciones
 @app.route('/elecciones')
 @login_required
 def lista_elecciones():
@@ -335,6 +336,48 @@ def edit_profile():
 def edit_identificacion():
     # Lógica aquí para editar la identificación
     return render_template('edit_identificacion.html', user=current_user)
+
+
+@app.route('/eleccion/<int:eleccion_id>/editar', methods=['GET', 'POST'])
+@login_required
+def editar_eleccion(eleccion_id):
+    if current_user.role != UserRole.ADMIN:
+        flash("Acceso denegado.", "danger")
+        return redirect(url_for('dashboard'))
+
+    eleccion = Eleccion.query.get_or_404(eleccion_id)
+    form = EditarEleccionForm(obj=eleccion)
+
+    if form.validate_on_submit():
+        eleccion.nombre = form.nombre.data
+        eleccion.descripcion = form.descripcion.data
+        eleccion.tipo_representacion = form.tipo_representacion.data
+        eleccion.fecha_inicio = form.fecha_inicio.data
+        eleccion.fecha_fin = form.fecha_fin.data
+
+        now = datetime.now()
+        estado_solicitado = form.estado.data
+
+        # Calcular el estado que realmente debería tener según las fechas
+        if eleccion.fecha_inicio <= now <= eleccion.fecha_fin:
+            estado_esperado = 'activa'
+        elif now > eleccion.fecha_fin:
+            estado_esperado = 'finalizada'
+        else:  # now < eleccion.fecha_inicio
+            estado_esperado = 'programada'
+
+        if estado_solicitado != estado_esperado:
+            flash(f"⚠️ El estado solicitado ('{estado_solicitado}') no es coherente con las fechas. "
+                  f"Se ha actualizado automáticamente a '{estado_esperado}'.", "warning")
+            eleccion.estado = estado_esperado
+        else:
+            eleccion.estado = estado_solicitado
+            flash("Elección actualizada exitosamente.", "success")
+
+        db.session.commit()
+        return redirect(url_for('ver_eleccion', eleccion_id=eleccion.id))
+
+    return render_template('editar_eleccion.html', form=form, eleccion=eleccion)
 
 # Ruta para cambiar la contraseña
 @app.route('/change_password', methods=['GET', 'POST'])
