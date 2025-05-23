@@ -214,11 +214,6 @@ def crear_eleccion():
 #------------------------------------------
 #            ENDPOINT LISTAR
 #------------------------------------------
-@app.route('/manage_users', methods=['GET'])
-@login_required
-def manage_users():
-    # Lógica para gestionar usuarios (puedes cargar la lista de usuarios, etc.)
-    return render_template('manage_users.html')  # Asegúrate de tener esta plantilla
 
 @app.route('/listar_usuarios')
 @login_required
