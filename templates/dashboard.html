@@ -90,7 +90,7 @@
           <a href="{{ url_for('logs_elecciones') }}" class="btn btn-outline-info">Ver Cambios de Elecciones</a>
 
         {% elif role == 'candidato' %}
-          <a href="{{ url_for('lista_elecciones') }}" class="btn btn-secondary">Ver Lista de Elecciones</a>
+          <a href="{{ url_for('elecciones') }}" class="btn btn-secondary">Ver Lista de Elecciones</a>
           <a href="{{ url_for('resultados_elecciones') }}" class="btn btn-success">Resultados de las Elecciones</a>
 
         {% elif role == 'administrativo' %}

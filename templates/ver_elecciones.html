@@ -100,10 +100,12 @@
             <a href="{{ url_for('editar_eleccion', eleccion_id=eleccion.id) }}">
               <button class="edit-btn">Editar</button>
             </a>
-          {% endif %}
-          <a href="{{ url_for('votar_eleccion', id=eleccion.id) }}">
+          {% elif role != 'admin' %}
+
+          <a href="{{ url_for('votar', eleccion_id=eleccion.id) }}">
             <button class="vote-btn">Votar</button>
           </a>
+          {% endif %}
         </div>
       </div>
     {% endfor %}

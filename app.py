@@ -394,6 +394,40 @@ def change_password():
 
     return render_template('change_password.html')  # Asegúrate de tener una plantilla para esta vista
 
+# Ruta para votar en una elección
+@app.route('/votar/<int:eleccion_id>', methods=['GET', 'POST'])
+@login_required
+def votar(eleccion_id):
+    if current_user.role != UserRole.VOTANTE:
+        flash("Acceso denegado", "danger")
+        return redirect(url_for('dashboard'))
+
+    eleccion = Eleccion.query.get_or_404(eleccion_id)
+    candidatos = Candidatura.query.filter_by(eleccionId=eleccion_id).all()
+
+    # Formulario vacío para CSRF protection
+    form = VotarForm()
+
+    voto_existente = Voto.query.filter_by(userId=current_user.id, eleccionId=eleccion_id).first()
+    if voto_existente:
+        flash("Ya has votado en esta elección", "info")
+        return redirect(url_for('votaciones_disponibles'))
+
+    if request.method == 'POST' and form.validate_on_submit():
+        candidatura_id = int(request.form['candidatura_id'])
+
+        nuevo_voto = Voto(
+            userId=current_user.id,
+            eleccionId=eleccion_id,
+            candidaturaId=candidatura_id
+        )
+        db.session.add(nuevo_voto)
+        db.session.commit()
+        flash("✅ ¡Tu voto fue registrado exitosamente!", "success")
+        return redirect(url_for('dashboard'))
+
+    return render_template('votar.html', eleccion=eleccion, candidatos=candidatos, form=form)
+
 #------------------------------------------
 #            ENDPOINT ELIMINAR
 #------------------------------------------
