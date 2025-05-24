@@ -277,7 +277,7 @@ def lista_elecciones():
     cambios = 0
 
     # Actualizar el estado de las elecciones
-    for e in elecciones:
+    for  e in elecciones:
         if e.fecha_inicio <= now <= e.fecha_fin and e.estado != 'activa':
             e.estado = 'activa'
             cambios += 1
@@ -315,8 +315,54 @@ def lista_elecciones():
 @app.route('/resultados_elecciones')
 @login_required
 def resultados_elecciones():
-    # Lógica para mostrar los resultados de las elecciones
-    return render_template('resultados_elecciones.html')  # Asegúrate de tener esta plantilla
+    elecciones = Eleccion.query.all()
+    return render_template('resultados_elecciones.html', elecciones=elecciones)  # Asegúrate de tener esta plantilla
+
+@app.route('/resultados/<int:eleccion_id>')
+@login_required
+def ver_resultado_eleccion(eleccion_id):
+    eleccion = Eleccion.query.get_or_404(eleccion_id)
+
+    # Obtener candidaturas con sus votos
+    candidaturas = Candidatura.query.filter_by(eleccionId=eleccion_id).all()
+    
+    resultados = []
+    for c in candidaturas:
+        perfil = c.user.profile
+        nombres = perfil.nombres if perfil and perfil.nombres else c.user.username
+        apellidos = perfil.apellidos if perfil and perfil.apellidos else ''
+        resultados.append({
+            'candidato': f"{nombres} {apellidos}".strip(),
+            'username': c.user.username,
+            'propuesta': c.propuesta,
+            'votos': len(c.votos)
+        })
+
+    # Ordenar por número de votos descendente
+    resultados.sort(key=lambda x: x['votos'], reverse=True)
+
+    return render_template('ver_resultado_eleccion.html', eleccion=eleccion, resultados=resultados)
+
+@app.route('/resultados/<int:eleccion_id>/print')
+@login_required
+def ver_resultado_eleccion_print(eleccion_id):
+    eleccion = Eleccion.query.get_or_404(eleccion_id)
+    candidaturas = Candidatura.query.filter_by(eleccionId=eleccion_id).all()
+
+    resultados = []
+    for c in candidaturas:
+        perfil = c.user.profile
+        nombres = perfil.nombres if perfil and perfil.nombres else c.user.username
+        apellidos = perfil.apellidos if perfil and perfil.apellidos else ''
+        resultados.append({
+            'candidato': f"{nombres} {apellidos}".strip(),
+            'username': c.user.username,
+            'propuesta': c.propuesta,
+            'votos': len(c.votos)
+        })
+
+    resultados.sort(key=lambda x: x['votos'], reverse=True)
+    return render_template('ver_resultado_eleccion_print.html', eleccion=eleccion, resultados=resultados)
 
 
 
