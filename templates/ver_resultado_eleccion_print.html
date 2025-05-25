@@ -1,105 +1,67 @@
 {% extends "dashboard.html" %}
 
+{% block title %}Resultados - {{ eleccion.nombre }}{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <div class="text-center mb-4">
-        <h2>📊 Resultados de: <span class="text-primary">{{ eleccion.nombre }}</span></h2>
-        {% if resultados %}
-            <h5 class="text-success">
-                🥇 Ganador: <strong>{{ resultados[0].candidato }}</strong> con <strong>{{ resultados[0].votos }}</strong> voto(s)
-            </h5>
-        {% else %}
-            <div class="alert alert-warning">No hay resultados disponibles para esta elección.</div>
-        {% endif %}
+<main class="container py-5">
+    <h2 class="mb-4 text-center">📊 Resultados de: <span class="text-primary">{{ eleccion.nombre }}</span></h2>
+
+    {% if resultados and eleccion.estado == 'finalizada' %}
+    <div class="alert alert-success text-center fs-5 shadow-sm">
+        🥇 El ganador es <strong>{{ resultados[0].candidato }}</strong> con <strong>{{ resultados[0].votos }}</strong> voto(s)
     </div>
-
-    {% if resultados %}
-    <table class="table table-bordered table-sm align-middle">
-        <thead class="table-dark">
-            <tr>
-                <th>#</th>
-                <th>Nombre</th>
-                <th>Usuario</th>
-                <th>Propuesta</th>
-                <th>Votos</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for c in resultados %}
-            <tr class="{% if loop.first %}table-warning fw-bold{% endif %}">
-                <td>{{ loop.index }}</td>
-                <td>{{ c.candidato }}</td>
-                <td>@{{ c.username }}</td>
-                <td>{{ c.propuesta }}</td>
-                <td><strong>{{ c.votos }}</strong></td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <div class="chart-container mt-5">
-        <h6 class="text-center">📈 Votos por Candidato (Gráfico de Barras)</h6>
-        <canvas id="barChart" height="100"></canvas>
+    {% elif resultados %}
+    <div class="alert alert-info text-center fs-6 shadow-sm">
+        ℹ️ Esta elección aún no ha finalizado. Los resultados pueden cambiar.
     </div>
     {% endif %}
 
-    <div class="no-print text-center mt-5">
-        <a href="{{ url_for('resultados_elecciones') }}" class="btn btn-secondary">← Volver</a>
-        <button onclick="window.print()" class="btn btn-success">🖨️ Imprimir / Exportar PDF</button>
+    <div class="table-responsive mt-4">
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Foto</th>
+                    <th>Nombre</th>
+                    <th>Usuario</th>
+                    <th>Propuesta</th>
+                    <th>Votos</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in resultados %}
+                <tr class="{% if loop.index0 == 0 %}table-warning fw-bold{% endif %}">
+                    <td>{{ loop.index }}</td>
+                    <td>
+                        {% set perfil = c.get('profile') %}
+                        <img src="{{ url_for('uploaded_file', filename=perfil.profile_picture if perfil and perfil.profile_picture else 'default.jpg') }}"
+                             alt="Foto del candidato"
+                             class="rounded-circle shadow-sm"
+                             style="width: 40px; height: 40px; object-fit: cover; cursor: pointer;"
+                             onclick="showImageInModal(this.src)">
+                    </td>
+                    <td>{{ c.candidato }}</td>
+                    <td><code>@{{ c.username }}</code></td>
+                    <td>{{ c.propuesta }}</td>
+                    <td><span class="badge bg-primary px-3 py-2">{{ c.votos }}</span></td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted">No hay candidatos registrados para esta elección.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
-</div>
 
-<!-- Chart.js Script -->
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const ctx = document.getElementById('barChart').getContext('2d');
+    <!-- Gráficos y botones aquí -->
+    <!-- ... -->
 
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: [{% for c in resultados %}'{{ c.candidato | escapejs }}'{% if not loop.last %}, {% endif %}{% endfor %}],
-                datasets: [{
-                    label: 'Votos',
-                    data: [{% for c in resultados %}{{ c.votos }}{% if not loop.last %}, {% endif %}{% endfor %}],
-                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { enabled: true }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        precision: 0,
-                        ticks: {
-                            stepSize: 1
-                        }
-                    }
-                }
-            }
-        });
-    });
-</script>
+</main>
 
-<!-- Chart.js CDN (agrega en tu base si no está) -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Modal y demás -->
+{% endblock %}
 
-<style>
-    @media print {
-        .no-print {
-            display: none !important;
-        }
-        body {
-            -webkit-print-color-adjust: exact;
-        }
-        .table th, .table td {
-            border: 1px solid #000 !important;
-        }
-    }
-</style>
+{% block scripts %}
+<!-- Scripts para modal y gráficos aquí -->
 {% endblock %}
