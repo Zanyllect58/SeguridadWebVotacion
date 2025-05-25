@@ -1,22 +1,14 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Resultados - {{ eleccion.nombre }}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <script src="https://www.gstatic.com/charts/loader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
+{% extends "dashboard.html" %}
+
+{% block content %}
 <main class="container py-5">
     <h2 class="mb-4 text-center">📊 Resultados de: <span class="text-primary">{{ eleccion.nombre }}</span></h2>
 
-    {% if resultados and eleccion.estado == 'finalizada' %}
+    {% if resultados|length > 0 and eleccion.estado == 'finalizada' %}
     <div class="alert alert-success text-center fs-5 shadow-sm">
         🥇 El ganador es <strong>{{ resultados[0].candidato }}</strong> con <strong>{{ resultados[0].votos }}</strong> voto(s)
     </div>
-    {% elif resultados %}
+    {% elif resultados|length > 0 %}
     <div class="alert alert-info text-center fs-6 shadow-sm">
         ℹ️ Esta elección aún no ha finalizado. Los resultados pueden cambiar.
     </div>
@@ -44,7 +36,8 @@
                              alt="Foto del candidato"
                              class="rounded-circle shadow-sm"
                              style="width: 40px; height: 40px; object-fit: cover; cursor: pointer;"
-                             onclick="showImageInModal(this.src)">
+                             onclick="showImageInModal(this.src)"
+                             role="button" aria-label="Ampliar imagen del candidato">
                     </td>
                     <td>{{ c.candidato }}</td>
                     <td><code>@{{ c.username }}</code></td>
@@ -60,6 +53,7 @@
         </table>
     </div>
 
+    {% if resultados|length > 0 %}
     <!-- Gráfico de Pastel -->
     <div class="mt-5">
         <h5 class="text-center mb-3">📊 Distribución de Votos</h5>
@@ -71,6 +65,7 @@
         <h5 class="text-center mb-3">📈 Votos por Candidato</h5>
         <canvas id="barChart" height="100"></canvas>
     </div>
+    {% endif %}
 
     <!-- Botones -->
     <div class="d-flex justify-content-center gap-3 mt-5">
@@ -107,7 +102,7 @@
         const data = google.visualization.arrayToDataTable([
             ['Candidato', 'Votos'],
             {% for c in resultados %}
-            ['{{ c.candidato }}', {{ c.votos }}],
+            ['{{ c.candidato | escapejs }}', {{ c.votos }}],
             {% endfor %}
         ]);
         const options = {
@@ -126,7 +121,7 @@
         new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: [{% for c in resultados %}'{{ c.candidato }}',{% endfor %}],
+                labels: [{% for c in resultados %}'{{ c.candidato | escapejs }}',{% endfor %}],
                 datasets: [{
                     label: 'Votos',
                     data: [{% for c in resultados %}{{ c.votos }},{% endfor %}],
@@ -150,7 +145,4 @@
         });
     });
 </script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+{% endblock %}
