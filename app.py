@@ -464,25 +464,20 @@ def edit_identificacion():
 @app.route('/admin/editar_usuario/<int:user_id>', methods=['GET', 'POST'])
 @login_required
 def editar_usuario_admin(user_id):
-    # Solo admins pueden acceder
-    if not current_user.is_admin:
-        abort(403)
-
-    # El admin no puede editarse a sí mismo
-    if current_user.id == user_id:
-        flash('No puedes editar tu propia información desde este panel.', 'warning')
-        return redirect(url_for('listar_usuarios'))
-
+    print("Método de la petición:", request.method)
+    if current_user.role != UserRole.ADMIN:
+        flash("Acceso denegado.", "danger")
+        return redirect(url_for('dashboard'))
+    
     user = User.query.get_or_404(user_id)
     form = EditUserForm(obj=user)
 
     if form.validate_on_submit():
         user.identificacion = form.identificacion.data
-        user.nombres = form.nombres.data
-        user.apellidos = form.apellidos.data
+        user.username = form.username.data
         user.email = form.email.data
-        user.edad = form.edad.data
-        user.genero = form.genero.data
+        user.rol = form.rol.data
+       
 
         try:
             db.session.commit()
@@ -492,8 +487,8 @@ def editar_usuario_admin(user_id):
             db.session.rollback()
             flash('Error al actualizar el usuario.', 'danger')
             print(f"Error: {e}")
-
-    return render_template('editar_usuario.html', form=form, user=user)
+    
+    return render_template('editar_usuario_admin.html', form=form, user=user)
 
 
 @app.route('/eleccion/<int:eleccion_id>/editar', methods=['GET', 'POST'])

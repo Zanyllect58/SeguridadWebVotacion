@@ -221,6 +221,7 @@
                 <td>${user.role}</td>
                 <td>
                     <button class="edit-btn btn btn-sm btn-primary" data-id="${user.id}">Editar</button>
+
                     <button class="delete-btn btn btn-sm btn-danger" data-id="${user.id}">Eliminar</button>
 
                     
@@ -232,12 +233,15 @@
             tableBody.appendChild(tr);
         });
 
-        document.querySelectorAll('.edit-btn').forEach(btn => {
+            document.querySelectorAll('.edit-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const id = parseInt(e.target.dataset.id);
-                openModal(id);
+
+                // Redirige al endpoint del backend Flask
+                window.location.href = `/admin/editar_usuario/${id}`;
             });
         });
+
 
 
         document.querySelectorAll('.delete-btn').forEach(btn => {
