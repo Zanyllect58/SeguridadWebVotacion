@@ -502,6 +502,35 @@ def votar(eleccion_id):
 #------------------------------------------
 #            ENDPOINT ELIMINAR
 #------------------------------------------
+@app.route('/delete_user/<int:user_id>', methods=['POST'])
+@login_required
+def delete_user(user_id):
+    if current_user.role != UserRole.ADMIN:
+        flash("Acceso denegado. Solo el administrador puede eliminar usuarios.", "danger")
+        return redirect(url_for('dashboard'))
+
+    user = User.query.get_or_404(user_id)
+
+    if user.id == current_user.id:
+        flash("No puedes eliminar tu propia cuenta.", "warning")
+        return redirect(url_for('manage_users'))
+
+    try:
+        #  Eliminar logs donde el usuario sea afectado o autor del cambio
+        IdentificationChangeLog.query.filter(
+            (IdentificationChangeLog.affected_user_id == user.id) |
+            (IdentificationChangeLog.changed_by_user_id == user.id)
+        ).delete(synchronize_session=False)
+
+
+        db.session.delete(user)
+        db.session.commit()
+        flash(f"Usuario {user.username} eliminado exitosamente.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error al eliminar usuario: {str(e)}", "danger")
+
+    return redirect(url_for('listar_usuarios'))
 
 # Ruta para eliminar una elección
 @app.route('/eleccion/<int:eleccion_id>/eliminar', methods=['POST'])
