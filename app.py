@@ -59,11 +59,6 @@ def uploaded_file(filename):
 with app.app_context():
     db.create_all()
 
-
-
-
-
-
 #------------------------------------------
 #            ENDPOINT BASE
 #------------------------------------------
