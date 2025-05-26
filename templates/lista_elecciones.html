@@ -156,13 +156,13 @@
         <td>{{ eleccion.fecha_inicio.strftime('%d/%m/%Y %H:%M') }}</td>
         <td>{{ eleccion.fecha_fin.strftime('%d/%m/%Y %H:%M') }}</td>
         <td class="d-flex gap-1 flex-wrap">
-          <a href="#" class="btn btn-sm btn-info text-white" title="Ver">
+          <a href="{{ url_for('ver_eleccion', eleccion_id=eleccion.id) }}" class="btn btn-sm btn-info text-white" title="Ver">
             <i class="bi bi-eye"></i>
           </a>
           <a href="{{ url_for('editar_eleccion', eleccion_id=eleccion.id) }}" class="btn btn-sm btn-outline-primary" title="Editar">
             <i class="bi bi-pencil-square"></i>
           </a>
-          <a href="#" class="btn btn-success btn-sm" title="Candidatos">
+          <a href="{{ url_for('gestionar_candidatos', eleccion_id=eleccion.id) }}" class="btn btn-success btn-sm" title="Candidatos">
             <i class="bi bi-people"></i>
           </a>
           <form method="POST" action="{{ url_for('eliminar_eleccion', eleccion_id=eleccion.id) }}"
