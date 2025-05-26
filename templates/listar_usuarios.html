@@ -241,8 +241,8 @@
 
 
         document.querySelectorAll('.delete-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-     const id = parseInt(e.target.dataset.id);
+        btn.addEventListener('click', (e) => {
+        const id = parseInt(e.target.dataset.id);
 
             if (confirm("¿Estás seguro de que deseas eliminar este usuario?")) {
                 fetch(`/delete_user/${id}`, {
