@@ -89,6 +89,7 @@
 {% block content %}
 <div class="container-fluid p-0">
     <h1 class="mb-4">Usuarios Registrados</h1>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
      {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -220,6 +221,7 @@
                 <td>${user.role}</td>
                 <td>
                     <button class="edit-btn btn btn-sm btn-primary" data-id="${user.id}">Editar</button>
+                    <button class="delete-btn btn btn-sm btn-danger" data-id="${user.id}">Eliminar</button>
 
                     
 
@@ -237,8 +239,44 @@
             });
         });
 
+
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+     const id = parseInt(e.target.dataset.id);
+
+            if (confirm("¿Estás seguro de que deseas eliminar este usuario?")) {
+                fetch(`/delete_user/${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': getCSRFToken() // Si usas CSRF protection
+                    },
+                })
+                .then(response => {
+                    if (response.redirected) {
+                        window.location.href = response.url;
+                    } else if (response.ok) {
+                        // Eliminar la fila del DOM
+                        const row = e.target.closest('tr');
+                        if (row) row.remove();
+                    } else {
+                        alert('No se pudo eliminar el usuario.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al eliminar el usuario:', error);
+                    alert('Ocurrió un error al intentar eliminar el usuario.');
+                });
+            }
+        });
+    });
+
         
     }
+
+    
+
 
     function sortTable(column) {
         if (currentSortColumn === column) {
@@ -256,6 +294,11 @@
 
         renderTable(filteredUsers);
     }
+
+    function getCSRFToken() {
+    return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    }
+
 
     function filterTable(term) {
         term = term.toLowerCase();
