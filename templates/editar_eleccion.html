@@ -3,58 +3,62 @@
 {% block title %}Editar Elección{% endblock %}
 
 {% block content %}
-<div class="container mt-5" style="max-width: 600px;">
-    
-    <h2 class="mb-4 text-center">Editar Elección</h2>
+<div class="container-fluid mt-5">
 
-    <form method="POST" novalidate>
-        {{ form.hidden_tag() }}
-
-        <div class="mb-3">
-            {{ form.nombre.label(class="form-label") }}
-            {{ form.nombre(class="form-control", placeholder="Ingrese el nombre de la elección") }}
-            {% for error in form.nombre.errors %}
-                <div class="form-text text-danger">{{ error }}</div>
-            {% endfor %}
+    <div class="card shadow w-100">
+        <div class="card-header bg-primary text-white text-center">
+            <h4 class="mb-0">Editar Elección</h4>
         </div>
+        <div class="card-body">
+            <form method="POST" novalidate>
+                {{ form.hidden_tag() }}
 
-        <div class="mb-3">
-            {{ form.descripcion.label(class="form-label") }}
-            {{ form.descripcion(class="form-control", rows=3, placeholder="Ingrese una descripción breve") }}
+                <div class="mb-3">
+                    {{ form.nombre.label(class="form-label") }}
+                    {{ form.nombre(class="form-control", placeholder="Ingrese el nombre de la elección") }}
+                    {% for error in form.nombre.errors %}
+                        <div class="form-text text-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.descripcion.label(class="form-label") }}
+                    {{ form.descripcion(class="form-control", rows=3, placeholder="Ingrese una descripción breve") }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.tipo_representacion.label(class="form-label") }}
+                    {{ form.tipo_representacion(class="form-select") }}
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        {{ form.fecha_inicio.label(class="form-label") }}
+                        {{ form.fecha_inicio(class="form-control", placeholder="DD/MM/AAAA") }}
+                        {% for error in form.fecha_inicio.errors %}
+                            <div class="form-text text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form.fecha_fin.label(class="form-label") }}
+                        {{ form.fecha_fin(class="form-control", placeholder="DD/MM/AAAA") }}
+                        {% for error in form.fecha_fin.errors %}
+                            <div class="form-text text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        {{ form.submit.label.text if form.submit.label.text else "Guardar cambios" }}
+                    </button>
+                    <a href="{{ url_for('lista_elecciones', eleccion_id=eleccion.id) }}" class="btn btn-secondary">
+                        Cancelar
+                    </a>
+                </div>
+            </form>
         </div>
+    </div>
 
-        <div class="mb-3">
-            {{ form.tipo_representacion.label(class="form-label") }}
-            {{ form.tipo_representacion(class="form-select") }}
-        </div>
-
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                {{ form.fecha_inicio.label(class="form-label") }}
-                {{ form.fecha_inicio(class="form-control", placeholder="DD/MM/AAAA") }}
-                {% for error in form.fecha_inicio.errors %}
-                    <div class="form-text text-danger">{{ error }}</div>
-                {% endfor %}
-            </div>
-            <div class="col-md-6 mb-3">
-                {{ form.fecha_fin.label(class="form-label") }}
-                {{ form.fecha_fin(class="form-control", placeholder="DD/MM/AAAA") }}
-                {% for error in form.fecha_fin.errors %}
-                    <div class="form-text text-danger">{{ error }}</div>
-                {% endfor %}
-            </div>
-        </div>
-
-       
-
-        <div class="d-flex justify-content-between">
-            <button type="submit" class="btn btn-primary">
-                {{ form.submit.label.text if form.submit.label.text else "Guardar cambios" }}
-            </button>
-            <a href="{{ url_for('lista_elecciones', eleccion_id=eleccion.id) }}" class="btn btn-secondary">
-                Cancelar
-            </a>
-        </div>
-    </form>
 </div>
 {% endblock %}

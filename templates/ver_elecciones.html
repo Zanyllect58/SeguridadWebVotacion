@@ -84,18 +84,6 @@
   {% endblock %}
   {% block content %}
   <div class="container">
-       {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        <div id="flash-messages">
-            {% for category, message in messages %}
-                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
-    {% endwith %}
 
     <form method="GET" class="row g-3 mb-4 w-100">
     <!-- Búsqueda por nombre -->
@@ -131,9 +119,20 @@
        <div class="col-md-1"> 
         <a href="{{ url_for('lista_elecciones') }}" class="btn btn-secondary w-100">Limpiar</a>
        </div> 
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div id="flash-messages">
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% endwith %}  
     </form> 
   
-    
     {% for eleccion in elecciones %}
       <div class="card">
         <div style="text-align: center;">
