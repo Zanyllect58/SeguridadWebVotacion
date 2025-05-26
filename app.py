@@ -236,27 +236,32 @@ def crear_eleccion():
 @app.route('/listar_usuarios')
 @login_required
 def listar_usuarios():
-    if current_user.role != UserRole.ADMIN:
-        flash("Acceso denegado. Solo el administrador puede ver esta sección.", "danger")
-        return redirect(url_for('dashboard'))
+    usuarios = User.query.all()
+    
+    usuarios_serializados = []
+    for u in usuarios:
+        usuario_dict = {
+            'id': u.id,
+            'identificacion': u.identificacion,
+            'username': u.username,
+            'email': u.email,
+            'role': u.role.value,  # Serializamos el Enum como string legible
+        }
+        
+        if u.profile:
+            usuario_dict['profile'] = {
+                'nombres': u.profile.nombres,
+                'apellidos': u.profile.apellidos,
+                'email': u.profile.email,
+                'edad': u.profile.edad,
+                'genero': u.profile.genero,
+            }
+        else:
+            usuario_dict['profile'] = None
 
-    search = request.args.get('search', '', type=str)
-    role_filter = request.args.get('role', '', type=str)
+        usuarios_serializados.append(usuario_dict)
 
-    query = User.query.filter(User.id != current_user.id)
-
-    if search:
-        query = query.filter(
-            (User.username.ilike(f"%{search}%")) |
-            (User.identificacion.ilike(f"%{search}%"))
-        )
-
-    if role_filter:
-        query = query.filter_by(role=UserRole(role_filter))
-
-    users = query.all()
-
-    return render_template('listar_usuarios.html', users=users, search=search, role_filter=role_filter)
+    return render_template('listar_usuarios.html', usuarios=usuarios_serializados)
 
 
 # Ruta para ver la lista de elecciones
@@ -305,7 +310,7 @@ def lista_elecciones():
 
     elecciones = query.order_by(desc(Eleccion.fecha_inicio)).all()
 
-    return render_template('ver_elecciones.html', elecciones=elecciones)
+    return render_template('lista_elecciones.html', elecciones=elecciones)
 
 @app.route('/resultados_elecciones')
 @login_required
@@ -494,6 +499,26 @@ def votar(eleccion_id):
 #------------------------------------------
 #            ENDPOINT ELIMINAR
 #------------------------------------------
+
+# Ruta para eliminar una elección
+@app.route('/eleccion/<int:eleccion_id>/eliminar', methods=['POST'])
+@login_required
+def eliminar_eleccion(eleccion_id):
+    if current_user.role != UserRole.ADMIN:
+        flash("Acceso denegado. Solo el administrador puede eliminar elecciones.", "danger")
+        return redirect(url_for('dashboard'))
+
+    eleccion = Eleccion.query.get_or_404(eleccion_id)
+    
+    try:
+        db.session.delete(eleccion)
+        db.session.commit()
+        flash("Elección eliminada exitosamente.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Ocurrió un error al eliminar la elección: {str(e)}", "danger")
+
+    return redirect(url_for('lista_elecciones'))
 
 
 #------------------------------------------

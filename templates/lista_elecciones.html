@@ -1,0 +1,193 @@
+  {% extends "dashboard.html" %}
+
+  {% block title %}
+    Listar Elecciones
+  {% endblock %}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  {% block styles %}
+    {{ super() }}
+    <style>
+
+      .container {
+        display: flex;
+        gap: 2%;
+        flex-wrap: wrap;
+      }
+
+      .label {
+        font-weight: bold;
+      }
+
+      .buttons {
+        margin-top: 12px;
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+      }
+
+      /* Ajuste general para botones de búsqueda y limpiar */
+      .search-buttons {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      /* Tamaño más pequeño y compacto para botones Buscar y Limpiar */
+      .search-buttons .btn {
+        padding: 6px 10px;
+        font-size: 0.85rem;
+        white-space: nowrap; /* evita que el texto haga salto de línea */
+      }
+
+      /* Botones editar y votar, tamaño más compacto también */
+      .edit-btn,
+      .vote-btn {
+        padding: 6px 14px;
+        font-size: 0.9rem;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+        min-width: 80px; /* ancho mínimo para uniformidad */
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+
+      .edit-btn {
+        background-color: #28a745;
+        color: white;
+      }
+
+      .edit-btn:hover {
+        background-color: #218838;
+      }
+
+      .vote-btn {
+        background-color: #007bff;
+        color: white;
+      }
+
+      .vote-btn:hover {
+        background-color: #0069d9;
+      }
+
+      
+    </style>
+    {% endblock %}
+{% block content %}
+<div class="container mt-2">
+  <h2>Elecciones Registradas</h2>
+  <form method="GET" class="row g-3 mb-4 w-100">
+    <div class="col-md-4">
+      <input type="text" name="busqueda" class="form-control" placeholder="Buscar por nombre" value="{{ request.args.get('busqueda', '') }}">
+    </div>
+
+    <div class="col-md-3">
+      <select name="tipo" class="form-select">
+        <option value="">-- Filtrar por tipo --</option>
+        <option value="facultad" {% if request.args.get('tipo') == 'facultad' %}selected{% endif %}>Facultad</option>
+        <option value="semestre" {% if request.args.get('tipo') == 'semestre' %}selected{% endif %}>Semestre</option>
+        <option value="comite" {% if request.args.get('tipo') == 'comite' %}selected{% endif %}>Comité</option>
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <select name="estado" class="form-select">
+        <option value="">-- Filtrar por estado --</option>
+        <option value="programada" {% if request.args.get('estado') == 'programada' %}selected{% endif %}>Programada</option>
+        <option value="activa" {% if request.args.get('estado') == 'activa' %}selected{% endif %}>Activa</option>
+        <option value="finalizada" {% if request.args.get('estado') == 'finalizada' %}selected{% endif %}>Finalizada</option>
+      </select>
+    </div>
+
+    <div class="col-md-2 search-buttons">
+      <button type="submit" class="btn btn-primary">
+        <i class="bi bi-search"></i> Buscar
+      </button>
+      <a href="{{ url_for('lista_elecciones') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-clockwise"></i> Limpiar
+      </a>
+    </div>
+  </form>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div id="flash-messages">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <table class="table table-bordered table-striped align-middle">
+    <thead class="table-success">
+      <tr>
+        <th>#</th>
+        <th><i class="bi bi-card-text"></i> Nombre</th>
+        <th><i class="bi bi-people-fill"></i> Tipo de Representación</th>
+        <th><i class="bi bi-info-circle"></i> Estado</th>
+        <th><i class="bi bi-calendar-event"></i> Inicio</th>
+        <th><i class="bi bi-calendar-event"></i> Fin</th>
+        <th><i class="bi bi-gear"></i> Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for eleccion in elecciones %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ eleccion.nombre }}</td>
+        <td>{{ eleccion.tipo_representacion|capitalize }}</td>
+        <td>
+          {% if eleccion.estado == 'activa' %}
+            <span class="badge bg-success">Activa</span>
+          {% elif eleccion.estado == 'programada' %}
+            <span class="badge bg-warning text-dark">Programada</span>
+          {% elif eleccion.estado == 'finalizada' %}
+            <span class="badge bg-secondary">Finalizada</span>
+          {% else %}
+            <span class="badge bg-info text-dark">{{ eleccion.estado }}</span>
+          {% endif %}
+        </td>
+        <td>{{ eleccion.fecha_inicio.strftime('%d/%m/%Y %H:%M') }}</td>
+        <td>{{ eleccion.fecha_fin.strftime('%d/%m/%Y %H:%M') }}</td>
+        <td class="d-flex gap-1 flex-wrap">
+          <a href="#" class="btn btn-sm btn-info text-white" title="Ver">
+            <i class="bi bi-eye"></i>
+          </a>
+          <a href="{{ url_for('editar_eleccion', eleccion_id=eleccion.id) }}" class="btn btn-sm btn-outline-primary" title="Editar">
+            <i class="bi bi-pencil-square"></i>
+          </a>
+          <a href="#" class="btn btn-success btn-sm" title="Candidatos">
+            <i class="bi bi-people"></i>
+          </a>
+          <form method="POST" action="{{ url_for('eliminar_eleccion', eleccion_id=eleccion.id) }}"
+                class="d-inline"
+                onsubmit='return confirm("¿Estás seguro de que deseas eliminar la elección {{ eleccion.nombre }}?")'>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
+              <i class="bi bi-trash"></i>
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="7" class="text-center">No hay elecciones registradas.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <a href="{{ url_for('dashboard') }}" class="btn btn-secondary mt-3">
+    <i class="bi bi-arrow-left"></i> Volver al Dashboard
+  </a>
+</div>
+
+{% endblock %}
+
+    
