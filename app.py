@@ -360,8 +360,28 @@ def ver_resultado_eleccion_print(eleccion_id):
     return render_template('ver_resultado_eleccion_print.html', eleccion=eleccion, resultados=resultados)
 
 
+# Ruta para que los votantes vean las elecciones disponibles
+@app.route('/votaciones_disponibles')
+@login_required
+def votaciones_disponibles():
+    if current_user.role != UserRole.VOTANTE:
+        flash("Acceso denegado", "danger")
+        return redirect(url_for('dashboard'))
 
+    ahora = datetime.now()
+    elecciones = Eleccion.query.filter(Eleccion.estado == 'activa').all()
+    elecciones = [e for e in elecciones if not Voto.query.filter_by(userId=current_user.id, eleccionId=e.id).first()]
+    return render_template('votaciones_disponibles.html', elecciones=elecciones)
 
+@app.route('/mis-votaciones')
+@login_required
+def mis_votaciones():
+    if current_user.role != UserRole.VOTANTE:
+        flash("Acceso denegado", "danger")
+        return redirect(url_for('dashboard'))
+
+    votos = Voto.query.filter_by(userId=current_user.id).all()
+    return render_template('mis_votaciones.html', votos=votos)
 #------------------------------------------
 #            ENDPOINT ACTUALIZAR
 #------------------------------------------

@@ -1,141 +1,551 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <title>{% block title %}Dashboard{% endblock %}</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    />
 
     <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+      body {
+        background-color: #f8f9fa;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      .sidebar {
+        min-width: 250px;
+        max-width: 300px;
+        height: 100vh;
+        background-color: rgba(
+          33,
+          37,
+          41,
+          0.95
+        ); /* fondo oscuro con opacidad */
+        color: #ffffff;
+        display: flex;
+        flex-direction: column;
+        padding: 1rem;
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        overflow-y: auto;
+      }
+
+      .sidebar h5 {
+        color: #fff;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+      }
+
+      .sidebar .accordion-button {
+        background-color: transparent;
+        color: #000000;
+        font-weight: 500;
+        padding-left: 0.75rem;
+        border: none;
+      }
+
+      .sidebar .accordion-button:not(.collapsed) {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #ac1f1f;
+      }
+
+      .sidebar .accordion-button:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+        color: #5a5555;
+      }
+
+      .sidebar .accordion-button::after {
+        filter: brightness(0) invert(1); /* flecha blanca */
+      }
+
+      .sidebar .accordion-body {
+        padding-left: 1rem;
+      }
+
+      .sidebar .btn {
+        color: #9e5d5d;
+        background-color: transparent;
+        border: 1px solid transparent;
+        text-align: left;
+        padding-left: 0.5rem;
+        font-size: 0.9rem;
+        transition: all 0.2s ease-in-out;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .sidebar .btn:hover,
+      .sidebar .btn:focus {
+        background-color: rgba(255, 255, 255, 0.15);
+        color: #45c41f;
+        border-color: #573636;
+        text-decoration: none;
+      }
+
+      .sidebar a.btn-outline-primary,
+      .sidebar a.btn-outline-secondary,
+      .sidebar a.btn-outline-info,
+      .sidebar a.btn-outline-success {
+        color: #04070e;
+        border-color: rgba(255, 255, 255, 0.15);
+      }
+
+      .sidebar a.btn-outline-primary:hover,
+      .sidebar a.btn-outline-secondary:hover,
+      .sidebar a.btn-outline-info:hover,
+      .sidebar a.btn-outline-success:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+        color: #082353;
+        border-color: #fff;
+      }
+
+      main {
+        flex-grow: 1;
+      }
+
+      .profile-picture {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+      }
+
+      .navbar-profile-img {
+        width: 40px;
+        height: 40px;
+        object-fit: cover;
+      }
+
+      @media (max-width: 768px) {
         .sidebar {
-            min-width: 250px;
-            height: 100vh;
+          position: fixed;
+          z-index: 1040;
+          top: 56px; /* debajo del navbar */
+          left: 0;
+          height: calc(100vh - 56px);
+          transform: translateX(-100%);
+          transition: transform 0.3s ease-in-out;
         }
-        .sidebar .btn {
-            text-align: left;
+
+        .sidebar.show {
+          transform: translateX(0); /* Muestra el sidebar */
         }
-        main {
-            flex-grow: 1;
-        }
-        .profile-picture {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-        }
-        /* Perfil pequeño en navbar */
-        .navbar-profile-img {
-            width: 40px;
-            height: 40px;
-            object-fit: cover;
-        }
+      }
     </style>
+
     {% block styles %}{% endblock %}
-</head>
-<body>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container-fluid d-flex justify-content-between align-items-center">
+  </head>
+  <body>
+  
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    
+      <div
+        class="container-fluid d-flex justify-content-between align-items-center"
+      >
+        <!-- Info usuario a la izquierda -->
+        <div
+          class="d-flex align-items-center bg-dark bg-opacity-50 rounded px-2 py-1"
+        >
+          
 
- <!-- Info usuario a la izquierda -->
-<div class="d-flex align-items-center bg-dark bg-opacity-50 rounded px-2 py-1">
-  {% set profile_pic = current_user.profile.profile_picture if current_user.profile and current_user.profile.profile_picture else 'default.jpg' %}
-  <img src="{{ url_for('uploaded_file', filename=profile_pic) }}" 
-       alt="" class="rounded-circle navbar-profile-img shadow-sm border border-light" />
-  <div class="ms-3 text-white">
-    <div class="fw-semibold">{{ current_user.username }}</div>
-    <div class="small text-capitalize text-light-emphasis">{{ current_user.role.value }}</div>
-  </div>
-</div>
-
-
-      <!-- Botón para colapsar en móvil -->
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarActions" 
-        aria-controls="navbarActions" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <!-- Menú a la derecha -->
-      <div class="collapse navbar-collapse justify-content-end" id="navbarActions">
-        <ul class="navbar-nav">
-          <li class="nav-item"><a class="nav-link btn btn-warning text-white mx-1" href="{{ url_for('edit_profile') }}">Editar Perfil</a></li>
-          <li class="nav-item"><a class="nav-link btn btn-info text-white mx-1" href="{{ url_for('edit_identificacion') }}">Cambiar Identificación</a></li>
-          <li class="nav-item"><a class="nav-link btn btn-info text-white mx-1" href="{{ url_for('change_password') }}">Cambiar Contraseña</a></li>
-          <li class="nav-item"><a class="nav-link btn btn-danger text-white mx-1" href="{{ url_for('logout') }}">Cerrar Sesión</a></li>
-        </ul>
-      </div>
-
-    </div>
-  </nav>
-
-  <div class="d-flex">
-    <nav class="sidebar bg-light border-end p-3">
-      <h5 class="fw-bold mb-4">Panel de Acciones</h5>
-      <div class="d-grid gap-2">
-        {% set role = current_user.role.value %}
-        {% if role == 'admin' %}
-   
-
-          <a href="{{ url_for('register', role='candidato') }}" class="btn btn-primary">Registrar Candidato</a>
-          <a href="{{ url_for('register', role='administrativo') }}" class="btn btn-primary">Registrar Administrativo</a>
-          <a href="{{ url_for('register', role='votante') }}" class="btn btn-primary">Registrar Votante</a>
-          <a href="{{ url_for('crear_eleccion') }}" class="btn btn-secondary">Crear Nueva Elección</a>
-          <a href="{{ url_for('lista_elecciones') }}" class="btn btn-secondary">Ver Lista de Elecciones</a>
- 
-          <a href="{{ url_for('resultados_elecciones') }}" class="btn btn-success">Resultados de las Elecciones</a>
-          <a href="{{ url_for('listar_usuarios') }}" class="btn btn-outline-secondary">Gestionar Usuarios</a>
-          <a href="{{ url_for('logs_identificaciones') }}" class="btn btn-outline-info">Ver Cambios de Identificación</a>
-          <a href="{{ url_for('logs_elecciones') }}" class="btn btn-outline-info">Ver Cambios de Elecciones</a>
-
-        {% elif role == 'candidato' %}
-          <a href="{{ url_for('elecciones') }}" class="btn btn-secondary">Ver Lista de Elecciones</a>
-          <a href="{{ url_for('resultados_elecciones') }}" class="btn btn-success">Resultados de las Elecciones</a>
-
-        {% elif role == 'administrativo' %}
-          <a href="{{ url_for('register', role='votante') }}" class="btn btn-primary">Registrar Votante</a>
-          <a href="{{ url_for('lista_elecciones') }}" class="btn btn-secondary">Ver Lista de Elecciones</a>
-          <a href="{{ url_for('listar_usuarios') }}" class="btn btn-secondary">Ver Lista de Usuarios</a>
-
-        {% elif role == 'votante' %}
-          <a href="{{ url_for('votaciones_disponibles') }}" class="btn btn-success">Ver Elecciones Disponibles</a>
-          <a href="{{ url_for('mis_votaciones') }}" class="btn btn-success">🗳️ Mis Votaciones Realizadas</a>
-
-        {% else %}
-          <a href="{{ url_for('lista_elecciones') }}" class="btn btn-secondary">Ver Lista de Elecciones</a>
-        {% endif %}
+          {% set profile_pic = current_user.profile.profile_picture if
+          current_user.profile and current_user.profile.profile_picture else
+          'default.jpg' %}
+          <img
+            src="{{ url_for('uploaded_file', filename=profile_pic) }}"
+            alt="Foto de perfil"
+            class="rounded-circle navbar-profile-img shadow-sm border border-light"
+          />
+          <div class="ms-3 text-white">
+            <div class="fw-semibold">{{ current_user.username }}</div>
+            <div class="small text-capitalize text-light-emphasis">
+              {{ current_user.role.value }}
+            </div>
+          </div>
+        </div>
+<!-- Botón para colapsar en móvil -->
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarActions"
+            aria-controls="navbarActions"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span class="bi bi-list"> </span>
+          </button>
+        <!-- Menú a la derecha -->
+        <div
+          class="collapse navbar-collapse justify-content-end"
+          id="navbarActions"
+        >
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a
+                class="nav-link btn btn-warning text-white mx-1"
+                href="{{ url_for('edit_profile') }}"
+                ><i class="bi bi-pencil-square"></i> Editar Perfil</a
+              >
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link btn btn-info text-white mx-1"
+                href="{{ url_for('edit_identificacion') }}"
+                ><i class="bi bi-credit-card-2-front"></i> Cambiar
+                Identificación</a
+              >
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link btn btn-info text-white mx-1"
+                href="{{ url_for('change_password') }}"
+                ><i class="bi bi-key"></i> Cambiar Contraseña</a
+              >
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link btn btn-danger text-white mx-1"
+                href="{{ url_for('logout') }}"
+                ><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a
+              >
+            </li>
+          </ul>
+        </div>
       </div>
     </nav>
 
-    <main class="p-4 flex-grow-1">
-      {% block content %}
-      <!-- Contenido específico va aquí -->
-      {% endblock %}
-    </main>
-  </div>
+    <div class="d-flex">
+      <nav class="sidebar" id="sidebar">
+        <!-- Rol y descripción -->
+        {% set role_descriptions = { 'admin': 'Acceso completo para gestionar
+        usuarios, elecciones y configuraciones.', 'candidato': 'Puede ver
+        elecciones y resultados.', 'administrativo': 'Puede registrar votantes y
+        consultar listas y resultados.', 'votante': 'Puede participar en
+        elecciones disponibles y ver resultados.' } %}
+        <div class="mb-4 p-1 bg-secondary bg-opacity-10 rounded text-white">
+          <h6 class="mb-1 text-capitalize">{{ current_user.role.value }}</h6>
+          <small
+            >{{ role_descriptions.get(current_user.role.value, 'Rol sin
+            descripción') }}</small
+          >
+        </div>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const alerts = document.querySelectorAll('#flash-messages .alert');
-      alerts.forEach(alert => {
-        setTimeout(() => {
-          let opacity = 1;
-          const fadeEffect = setInterval(() => {
-            if (opacity <= 0) {
-              clearInterval(fadeEffect);
-              alert.remove();
-            } else {
-              opacity -= 0.1;
-              alert.style.opacity = opacity;
-            }
-          }, 25);
-        }, 3000);
+        <h5 class="fw-bold mb-4">Panel de Acciones</h5>
+        <div class="accordion" id="sidebarAccordion">
+          {% set user_role = current_user.role.value %}
+
+          <!-- Admin Role -->
+          {% if user_role == 'admin' %}
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingRegistrar">
+              <button
+                class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapseRegistrar"
+                aria-expanded="false"
+                aria-controls="collapseRegistrar"
+              >
+                <i class="bi bi-person-plus me-2"></i> Registrar
+              </button>
+            </h2>
+            <div
+              id="collapseRegistrar"
+              class="accordion-collapse collapse"
+              aria-labelledby="headingRegistrar"
+              data-bs-parent="#sidebarAccordion"
+            >
+              <div class="accordion-body d-grid gap-2">
+                <a
+                  href="{{ url_for('register', role='candidato') }}"
+                  class="btn btn-outline-primary"
+                  ><i class="bi bi-person"></i> Candidato</a
+                >
+                <a
+                  href="{{ url_for('register', role='administrativo') }}"
+                  class="btn btn-outline-primary"
+                  ><i class="bi bi-people"></i> Administrativo</a
+                >
+                <a
+                  href="{{ url_for('register', role='votante') }}"
+                  class="btn btn-outline-primary"
+                  ><i class="bi bi-check2-square"></i> Votante</a
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingElecciones">
+              <button
+                class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapseElecciones"
+                aria-expanded="false"
+                aria-controls="collapseElecciones"
+              >
+                <i class="bi bi-clipboard-check me-2"></i> Elecciones
+              </button>
+            </h2>
+            <div
+              id="collapseElecciones"
+              class="accordion-collapse collapse"
+              aria-labelledby="headingElecciones"
+              data-bs-parent="#sidebarAccordion"
+            >
+              <div class="accordion-body d-grid gap-2">
+                <a
+                  href="{{ url_for('crear_eleccion') }}"
+                  class="btn btn-outline-secondary"
+                  ><i class="bi bi-plus-lg"></i> Crear Nueva</a
+                >
+                <a
+                  href="{{ url_for('lista_elecciones') }}"
+                  class="btn btn-outline-secondary"
+                  ><i class="bi bi-list-ul"></i> Ver Lista</a
+                >
+                <a
+                  href="{{ url_for('resultados_elecciones') }}"
+                  class="btn btn-outline-success"
+                  ><i class="bi bi-bar-chart"></i> Resultados</a
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingGestion">
+              <button
+                class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapseGestion"
+                aria-expanded="false"
+                aria-controls="collapseGestion"
+              >
+                <i class="bi bi-gear me-2"></i> Gestión
+              </button>
+            </h2>
+            <div
+              id="collapseGestion"
+              class="accordion-collapse collapse"
+              aria-labelledby="headingGestion"
+              data-bs-parent="#sidebarAccordion"
+            >
+              <div class="accordion-body d-grid gap-2">
+                <a
+                  href="{{ url_for('listar_usuarios') }}"
+                  class="btn btn-outline-secondary"
+                  ><i class="bi bi-people"></i> Usuarios</a
+                >
+                <a
+                  href="{{ url_for('logs_identificaciones') }}"
+                  class="btn btn-outline-info"
+                  ><i class="bi bi-card-checklist"></i> Cambios
+                  Identificación</a
+                >
+                <a
+                  href="{{ url_for('logs_elecciones') }}"
+                  class="btn btn-outline-info"
+                  ><i class="bi bi-journal-text"></i> Cambios Elecciones</a
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Candidato Role -->
+          {% elif user_role == 'candidato' %}
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingEleccionesCandidato">
+              <button
+                class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapseEleccionesCandidato"
+                aria-expanded="false"
+                aria-controls="collapseEleccionesCandidato"
+              >
+                <i class="bi bi-clipboard-check me-2"></i> Elecciones
+              </button>
+            </h2>
+            <div
+              id="collapseEleccionesCandidato"
+              class="accordion-collapse collapse"
+              aria-labelledby="headingEleccionesCandidato"
+              data-bs-parent="#sidebarAccordion"
+            >
+              <div class="accordion-body d-grid gap-2">
+                <a
+                  href="{{ url_for('lista_elecciones') }}"
+                  class="btn btn-outline-secondary"
+                  ><i class="bi bi-list-ul"></i> Ver Lista de Elecciones</a
+                >
+                <a
+                  href="{{ url_for('resultados_elecciones') }}"
+                  class="btn btn-outline-success"
+                  ><i class="bi bi-bar-chart"></i> Resultados</a
+                >
+              </div>
+            </div>
+          </div>
+
+          {% elif user_role == 'administrativo' %}
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingRegistrarAdm">
+              <button
+                class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapseRegistrarAdm"
+                aria-expanded="false"
+                aria-controls="collapseRegistrarAdm"
+              >
+                <i class="bi bi-person-plus me-2"></i> Registrar
+              </button>
+            </h2>
+            <div
+              id="collapseRegistrarAdm"
+              class="accordion-collapse collapse"
+              aria-labelledby="headingRegistrarAdm"
+              data-bs-parent="#sidebarAccordion"
+            >
+              <div class="accordion-body d-grid gap-2">
+                <a
+                  href="{{ url_for('register', role='votante') }}"
+                  class="btn btn-outline-primary"
+                  ><i class="bi bi-check2-square"></i> Votante</a
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingEleccionesAdm">
+              <button
+                class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapseEleccionesAdm"
+                aria-expanded="false"
+                aria-controls="collapseEleccionesAdm"
+              >
+                <i class="bi bi-clipboard-check me-2"></i> Elecciones
+              </button>
+            </h2>
+            <div
+              id="collapseEleccionesAdm"
+              class="accordion-collapse collapse"
+              aria-labelledby="headingEleccionesAdm"
+              data-bs-parent="#sidebarAccordion"
+            >
+              <div class="accordion-body d-grid gap-2">
+                <a
+                  href="{{ url_for('elecciones') }}"
+                  class="btn btn-outline-secondary"
+                  ><i class="bi bi-list-ul"></i> Ver Lista de Elecciones</a
+                >
+                <a
+                  href="{{ url_for('resultados_elecciones') }}"
+                  class="btn btn-outline-success"
+                  ><i class="bi bi-bar-chart"></i> Resultados</a
+                >
+              </div>
+            </div>
+          </div>
+
+          {% else %}
+          <!-- Votante Role -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingVotante">
+              <button
+                class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapseVotante"
+                aria-expanded="false"
+                aria-controls="collapseVotante"
+              >
+                <i class="bi bi-clipboard-check me-2"></i> Elecciones
+              </button>
+            </h2>
+            <div
+              id="collapseVotante"
+              class="accordion-collapse collapse"
+              aria-labelledby="headingVotante"
+              data-bs-parent="#sidebarAccordion"
+            >
+              <div class="accordion-body d-grid gap-2">
+                <a
+                  href="{{ url_for('votaciones_disponibles') }}"
+                  class="btn btn-outline-secondary"
+                  ><i class="bi bi-list-ul"></i> Elecciones disponibles</a
+                >
+                <a
+                  href="{{ url_for('resultados_elecciones') }}"
+                  class="btn btn-outline-success"
+                  ><i class="bi bi-bar-chart"></i> Resultados</a
+                >
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </nav>
+
+      <main class="flex-grow-1 p-4">
+        <!-- Alertas Flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if
+        messages %}
+        <div
+          id="flash-messages"
+          class="mb-3"
+          style="position: fixed; top: 5rem; right: 1rem; z-index: 1100"
+        >
+          {% for category, message in messages %}
+          <div
+            class="alert alert-{{ category }} alert-dismissible fade show"
+            role="alert"
+          >
+            {{ message }}
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"
+            ></button>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %} {% endwith %} {% block content %}
+        <!-- Aquí va el contenido principal -->
+        {% endblock %}
+      </main>
+    </div>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Cierra automáticamente las alertas después de 6 segundos
+      window.addEventListener("DOMContentLoaded", () => {
+        const alerts = document.querySelectorAll("#flash-messages .alert");
+        alerts.forEach((alert) => {
+          setTimeout(() => {
+            const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+            bsAlert.close();
+          }, 6000);
+        });
       });
-    });
-  </script>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  {% block scripts %}{% endblock %}
-</body>
+    </script>
+    {% block scripts %}{% endblock %}
+  </body>
 </html>
