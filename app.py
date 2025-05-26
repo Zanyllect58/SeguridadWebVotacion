@@ -251,7 +251,20 @@ def listar_usuarios():
 
     users = query.all()
 
-    return render_template('listar_usuarios.html', users=users, search=search, role_filter=role_filter)
+    # Función para convertir cada usuario a dict
+    def user_to_dict(user):
+        return {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'identificacion': user.identificacion,
+            # Si role es un Enum, obtiene su valor, si no, lo convierte a string
+            'role': user.role.value if hasattr(user.role, 'value') else str(user.role)
+        }
+
+    usuarios = [user_to_dict(u) for u in users]
+
+    return render_template('listar_usuarios.html', usuarios=usuarios, search=search, role_filter=role_filter)
 
 
 # Ruta para ver la lista de elecciones
