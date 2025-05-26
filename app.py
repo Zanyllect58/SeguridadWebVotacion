@@ -236,32 +236,27 @@ def crear_eleccion():
 @app.route('/listar_usuarios')
 @login_required
 def listar_usuarios():
-    usuarios = User.query.all()
-    
-    usuarios_serializados = []
-    for u in usuarios:
-        usuario_dict = {
-            'id': u.id,
-            'identificacion': u.identificacion,
-            'username': u.username,
-            'email': u.email,
-            'role': u.role.value,  # Serializamos el Enum como string legible
-        }
-        
-        if u.profile:
-            usuario_dict['profile'] = {
-                'nombres': u.profile.nombres,
-                'apellidos': u.profile.apellidos,
-                'email': u.profile.email,
-                'edad': u.profile.edad,
-                'genero': u.profile.genero,
-            }
-        else:
-            usuario_dict['profile'] = None
+    if current_user.role != UserRole.ADMIN:
+        flash("Acceso denegado. Solo el administrador puede ver esta sección.", "danger")
+        return redirect(url_for('dashboard'))
 
-        usuarios_serializados.append(usuario_dict)
+    search = request.args.get('search', '', type=str)
+    role_filter = request.args.get('role', '', type=str)
 
-    return render_template('listar_usuarios.html', usuarios=usuarios_serializados)
+    query = User.query.filter(User.id != current_user.id)
+
+    if search:
+        query = query.filter(
+            (User.username.ilike(f"%{search}%")) |
+            (User.identificacion.ilike(f"%{search}%"))
+        )
+
+    if role_filter:
+        query = query.filter_by(role=UserRole(role_filter))
+
+    users = query.all()
+
+    return render_template('listar_usuarios.html', users=users, search=search, role_filter=role_filter)
 
 
 # Ruta para ver la lista de elecciones
