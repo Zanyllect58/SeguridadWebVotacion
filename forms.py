@@ -32,7 +32,6 @@ class EditProfileForm(FlaskForm):
     nombres = StringField('Nombres', validators=[DataRequired(), Length(max=255)])
     apellidos = StringField('Apellidos', validators=[DataRequired(), Length(max=255)])
     email = StringField('Email', validators=[DataRequired(), Length(max=255)])
-    edad = IntegerField('Edad', validators=[NumberRange(min=0, max=120)])
     genero = SelectField('Género', choices=[
         ('masculino', 'Masculino'),
         ('femenino', 'Femenino'),
@@ -49,14 +48,12 @@ class EditProfileForm(FlaskForm):
     
 class EditUserForm(FlaskForm):
     identificacion = StringField('Identificación', validators=[DataRequired(), Length(min=5, max=20)])
-    nombres = StringField('Nombres', validators=[DataRequired(), Length(max=255)])
-    apellidos = StringField('Apellidos', validators=[DataRequired(), Length(max=255)])
+    username = StringField('Usuario', validators=[DataRequired(), Length(min=4, max=50)])
     email = StringField('Email', validators=[DataRequired(), Length(max=255)])
-    edad = IntegerField('Edad', validators=[NumberRange(min=0, max=120)])
-    genero = SelectField('Género', choices=[
-        ('masculino', 'Masculino'),
-        ('femenino', 'Femenino'),
-        ('otro', 'Otro')
+    rol = SelectField('Rol', choices=[
+        ('administrativo', 'Administrartivo'),
+        ('candidato', 'Candidato'),
+        ('votante', 'Votante')
     ], validators=[DataRequired()])
     submit = SubmitField('Guardar cambios')    
 
