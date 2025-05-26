@@ -1,33 +1,24 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Resultados - {{ eleccion.nombre }}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <script src="https://www.gstatic.com/charts/loader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
-<main class="container py-5">
-    <h2 class="mb-4 text-center">📊 Resultados de: <span class="text-primary">{{ eleccion.nombre }}</span></h2>
+{% extends "dashboard.html" %}
 
-    {% if resultados and eleccion.estado == 'finalizada' %}
-    <div class="alert alert-success text-center fs-5 shadow-sm">
-        🥇 El ganador es <strong>{{ resultados[0].candidato }}</strong> con <strong>{{ resultados[0].votos }}</strong> voto(s)
+{% block content %}
+<div class="container mt-4">
+    <div class="text-center mb-4">
+        <h2>📊 Resultados de: <span class="text-primary">{{ eleccion.nombre }}</span></h2>
+        {% if resultados %}
+            <h5 class="text-success">
+                🥇 Ganador: <strong>{{ resultados[0].candidato }}</strong> con <strong>{{ resultados[0].votos }}</strong> voto(s)
+            </h5>
+        {% else %}
+            <div class="alert alert-warning">No hay resultados disponibles para esta elección.</div>
+        {% endif %}
     </div>
-    {% elif resultados %}
-    <div class="alert alert-info text-center fs-6 shadow-sm">
-        ℹ️ Esta elección aún no ha finalizado. Los resultados pueden cambiar.
-    </div>
-    {% endif %}
 
-    <div class="table-responsive mt-4">
-        <table class="table table-bordered table-hover align-middle">
+    {% if resultados %}
+    <div id="tabla-a-exportar">
+        <table class="table table-bordered table-sm align-middle">
             <thead class="table-dark">
                 <tr>
                     <th>#</th>
-                    <th>Foto</th>
                     <th>Nombre</th>
                     <th>Usuario</th>
                     <th>Propuesta</th>
@@ -36,121 +27,91 @@
             </thead>
             <tbody>
                 {% for c in resultados %}
-                <tr class="{% if loop.index0 == 0 %}table-warning fw-bold{% endif %}">
+                <tr class="{% if loop.first %}table-warning fw-bold{% endif %}">
                     <td>{{ loop.index }}</td>
-                    <td>
-                        {% set perfil = c.get('profile') %}
-                        <img src="{{ url_for('uploaded_file', filename=perfil.profile_picture if perfil and perfil.profile_picture else 'default.jpg') }}"
-                             alt="Foto del candidato"
-                             class="rounded-circle shadow-sm"
-                             style="width: 40px; height: 40px; object-fit: cover; cursor: pointer;"
-                             onclick="showImageInModal(this.src)">
-                    </td>
                     <td>{{ c.candidato }}</td>
-                    <td><code>@{{ c.username }}</code></td>
+                    <td>@{{ c.username }}</td>
                     <td>{{ c.propuesta }}</td>
-                    <td><span class="badge bg-primary px-3 py-2">{{ c.votos }}</span></td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="6" class="text-center text-muted">No hay candidatos registrados para esta elección.</td>
+                    <td><strong>{{ c.votos }}</strong></td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 
-    <!-- Gráfico de Pastel -->
-    <div class="mt-5">
-        <h5 class="text-center mb-3">📊 Distribución de Votos</h5>
-        <div id="votos_chart" style="height: 300px;"></div>
-    </div>
-
-    <!-- Gráfico de Barras -->
-    <div class="mt-5">
-        <h5 class="text-center mb-3">📈 Votos por Candidato</h5>
+    <div class="chart-container mt-5 no-print">
+        <h6 class="text-center">📈 Votos por Candidato (Gráfico de Barras)</h6>
         <canvas id="barChart" height="100"></canvas>
     </div>
+    {% endif %}
 
-    <!-- Botones -->
-    <div class="d-flex justify-content-center gap-3 mt-5">
-        <a href="{{ url_for('resultados_elecciones') }}" class="btn btn-outline-secondary">← Volver</a>
-        <a href="{{ url_for('ver_resultado_eleccion_print', eleccion_id=eleccion.id) }}" class="btn btn-outline-dark">🖨️ Vista para imprimir</a>
-    </div>
-</main>
-
-<!-- Modal de imagen -->
-<div class="modal fade" id="profileImageModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content">
-            <div class="modal-header border-0">
-                <h6 class="modal-title">Foto del Candidato</h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body text-center">
-                <img id="modalProfileImage" class="img-fluid rounded shadow-sm" src="" alt="Imagen Ampliada">
-            </div>
-        </div>
+    <div class="no-print text-center mt-5">
+        <a href="{{ url_for('resultados_elecciones') }}" class="btn btn-secondary">← Volver</a>
+        <button onclick="imprimirTabla()" class="btn btn-success">🖨️ Exportar solo tabla</button>
     </div>
 </div>
 
-<!-- Scripts -->
+<!-- Chart.js Script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    function showImageInModal(src) {
-        document.getElementById('modalProfileImage').src = src;
-        new bootstrap.Modal(document.getElementById('profileImageModal')).show();
-    }
-
-    // Google Pie Chart
-    google.charts.load('current', {'packages': ['corechart']});
-    google.charts.setOnLoadCallback(() => {
-        const data = google.visualization.arrayToDataTable([
-            ['Candidato', 'Votos'],
-            {% for c in resultados %}
-            ['{{ c.candidato }}', {{ c.votos }}],
-            {% endfor %}
-        ]);
-        const options = {
-            title: 'Distribución de Votos',
-            pieHole: 0.4,
-            height: 300,
-            legend: { position: 'right' }
-        };
-        const chart = new google.visualization.PieChart(document.getElementById('votos_chart'));
-        chart.draw(data, options);
-    });
-
-    // Bar Chart with Chart.js
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", function () {
         const ctx = document.getElementById('barChart').getContext('2d');
+
         new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: [{% for c in resultados %}'{{ c.candidato }}',{% endfor %}],
+                labels: [{% for c in resultados %}"{{ c.candidato }}"{% if not loop.last %}, {% endif %}{% endfor %}],
                 datasets: [{
                     label: 'Votos',
-                    data: [{% for c in resultados %}{{ c.votos }},{% endfor %}],
-                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
+                    data: [{% for c in resultados %}{{ c.votos }}{% if not loop.last %}, {% endif %}{% endfor %}],
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
                     borderWidth: 1
                 }]
             },
             options: {
                 responsive: true,
                 plugins: {
-                    legend: { display: false }
+                    legend: { display: false },
+                    tooltip: { enabled: true }
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
-                        precision: 0
+                        precision: 0,
+                        ticks: {
+                            stepSize: 1
+                        }
                     }
                 }
             }
         });
     });
+
+    function imprimirTabla() {
+        const contenido = document.getElementById('tabla-a-exportar').innerHTML;
+        const ventana = window.open('', '', 'height=700,width=900');
+        ventana.document.write('<html><head><title>Exportar Resultados</title>');
+        ventana.document.write('<style>table { width: 100%; border-collapse: collapse; } table, th, td { border: 1px solid black; padding: 8px; text-align: center; }</style>');
+        ventana.document.write('</head><body>');
+        ventana.document.write(contenido);
+        ventana.document.write('</body></html>');
+        ventana.document.close();
+        ventana.print();
+    }
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<style>
+    @media print {
+        .no-print, .chart-container, h2, h5 {
+            display: none !important;
+        }
+        body {
+            -webkit-print-color-adjust: exact;
+        }
+        .table th, .table td {
+            border: 1px solid #000 !important;
+        }
+    }
+</style>
+{% endblock %}

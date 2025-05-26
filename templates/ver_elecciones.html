@@ -84,6 +84,55 @@
   {% endblock %}
   {% block content %}
   <div class="container">
+
+    <form method="GET" class="row g-3 mb-4 w-100">
+    <!-- Búsqueda por nombre -->
+    <div class="col-md-4">
+        <input type="text" name="busqueda" class="form-control" placeholder="Buscar por nombre" value="{{ request.args.get('busqueda', '') }}">
+    </div>
+
+    <!-- Filtro por tipo de representación -->
+    <div class="col-md-3">
+        <select name="tipo" class="form-select">
+            <option value="">-- Filtrar por tipo --</option>
+            <option value="facultad" {% if request.args.get('tipo') == 'facultad' %}selected{% endif %}>Facultad</option>
+            <option value="semestre" {% if request.args.get('tipo') == 'semestre' %}selected{% endif %}>Semestre</option>
+            <option value="comite" {% if request.args.get('tipo') == 'comite' %}selected{% endif %}>Comite</option>
+        </select>
+    </div>
+
+    <!-- Filtro por estado -->
+    <div class="col-md-3">
+        <select name="estado" class="form-select">
+            <option value="">-- Filtrar por estado --</option>
+            <option value="programada" {% if request.args.get('estado') == 'programada' %}selected{% endif %}>Programada</option>
+            <option value="activa" {% if request.args.get('estado') == 'activa' %}selected{% endif %}>Activa</option>
+            <option value="finalizada" {% if request.args.get('estado') == 'finalizada' %}selected{% endif %}>Finalizada</option>
+        </select>
+    </div>
+    
+    <!-- Botones -->
+   
+       <div class="col-md-1">
+         <button type="submit" class="btn btn-primary w-100">Buscar</button>
+       </div>
+       <div class="col-md-1"> 
+        <a href="{{ url_for('lista_elecciones') }}" class="btn btn-secondary w-100">Limpiar</a>
+       </div> 
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div id="flash-messages">
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% endwith %}  
+    </form> 
+  
     {% for eleccion in elecciones %}
       <div class="card">
         <div style="text-align: center;">
@@ -113,8 +162,10 @@
               {% endif %}
             </div>
         
-      </div>
+       </div>
+      
     {% endfor %}
+   
   </div>
 {% endblock %}
 

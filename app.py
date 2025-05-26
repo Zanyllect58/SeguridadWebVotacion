@@ -364,6 +364,7 @@ def ver_resultado_eleccion_print(eleccion_id):
     resultados.sort(key=lambda x: x['votos'], reverse=True)
     return render_template('ver_resultado_eleccion_print.html', eleccion=eleccion, resultados=resultados)
 
+
 # Ruta para que los votantes vean las elecciones disponibles
 @app.route('/votaciones_disponibles')
 @login_required
@@ -423,25 +424,26 @@ def editar_eleccion(eleccion_id):
 
         now = datetime.now()
         estado_solicitado = form.estado.data
-
-        # Calcular el estado que realmente debería tener según las fechas
+     
+            # Calcular el estado que realmente debería tener según las fechas
         if eleccion.fecha_inicio <= now <= eleccion.fecha_fin:
             estado_esperado = 'activa'
         elif now > eleccion.fecha_fin:
             estado_esperado = 'finalizada'
-        else:  # now < eleccion.fecha_inicio
+        else:
+            now < eleccion.fecha_inicio
             estado_esperado = 'programada'
 
         if estado_solicitado != estado_esperado:
-            flash(f"⚠️ El estado solicitado ('{estado_solicitado}') no es coherente con las fechas. "
+            flash(f"⚠️ El estado solicitado '{estado_solicitado}' no es coherente con las fechas. "
                   f"Se ha actualizado automáticamente a '{estado_esperado}'.", "warning")
             eleccion.estado = estado_esperado
         else:
             eleccion.estado = estado_solicitado
-            flash("Elección actualizada exitosamente.", "success")
+            flash(f"Elección actualizada exitosamente", "success")
 
         db.session.commit()
-        return redirect(url_for('ver_eleccion', eleccion_id=eleccion.id))
+        return redirect(url_for('lista_elecciones', eleccion_id=eleccion.id))
 
     return render_template('editar_eleccion.html', form=form, eleccion=eleccion)
 
