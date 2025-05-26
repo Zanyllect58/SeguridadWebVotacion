@@ -46,6 +46,19 @@ class EditProfileForm(FlaskForm):
     ], validators=[DataRequired()])
     notifications_enabled = BooleanField('Recibir notificaciones')
     submit = SubmitField('Guardar cambios')
+    
+class EditUserForm(FlaskForm):
+    identificacion = StringField('Identificación', validators=[DataRequired(), Length(min=5, max=20)])
+    nombres = StringField('Nombres', validators=[DataRequired(), Length(max=255)])
+    apellidos = StringField('Apellidos', validators=[DataRequired(), Length(max=255)])
+    email = StringField('Email', validators=[DataRequired(), Length(max=255)])
+    edad = IntegerField('Edad', validators=[NumberRange(min=0, max=120)])
+    genero = SelectField('Género', choices=[
+        ('masculino', 'Masculino'),
+        ('femenino', 'Femenino'),
+        ('otro', 'Otro')
+    ], validators=[DataRequired()])
+    submit = SubmitField('Guardar cambios')    
 
 
 class ChangePasswordForm(FlaskForm):

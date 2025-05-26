@@ -465,6 +465,65 @@ def change_password():
 
     return render_template('change_password.html')  # Asegúrate de tener una plantilla para esta vista
 
+# Ruta para que el admin edite la contraseña de otros usuarios
+@app.route('/edit_user_password/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+def edit_user_password(user_id):
+    if current_user.role != UserRole.ADMIN:
+        flash("No tienes permisos para editar contraseñas.", "danger")
+        return redirect(url_for('dashboard'))
+
+    user = User.query.get_or_404(user_id)
+    form = ChangePasswordForm()
+
+    if form.validate_on_submit():
+        user.set_password(form.new_password.data)
+        db.session.commit()
+        flash(f"Contraseña de {user.username} actualizada", "success")
+        return redirect(url_for('dashboard'))
+
+    return render_template('listar_usuarios.html', form=form, user=user)
+
+@app.route('/edit_user_identificacion/<int:user_id>', methods=['GET', 'POST']) # Ruta para que el admin edite la identificación de otros usuarios
+@login_required
+def edit_user_identificacion(user_id):
+    if current_user.role != UserRole.ADMIN:
+        flash("Acceso denegado. Solo el administrador puede editar identificaciones.", "danger")
+        return redirect(url_for('dashboard'))
+
+    user = User.query.get_or_404(user_id)
+    form = EditIdentificacionForm()
+
+    if form.validate_on_submit():
+        nueva_identificacion = form.nueva_identificacion.data
+
+        existing_user = User.query.filter_by(identificacion=nueva_identificacion, role=user.role).first()
+        if existing_user:
+            flash('Ya existe un usuario con esa identificación en el mismo rol.', 'danger')
+            return redirect(url_for('edit_user_identificacion', user_id=user.id))
+
+        try:
+            old_identificacion = user.identificacion
+            user.identificacion = nueva_identificacion
+
+            # Registrar el cambio en logs
+            log = IdentificationChangeLog(
+                changed_by_user_id=current_user.id,
+                affected_user_id=user.id,
+                old_identificacion=old_identificacion,
+                new_identificacion=nueva_identificacion
+            )
+            db.session.add(log)
+
+            db.session.commit()
+            flash('Identificación del usuario actualizada exitosamente.', 'success')
+            return redirect(url_for('manage_users'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Ocurrió un error al actualizar: {str(e)}', 'danger')
+
+    return render_template('listar_usuarios.html', form=form, user=user)
+
 # Ruta para votar en una elección
 @app.route('/votar/<int:eleccion_id>', methods=['GET', 'POST'])
 @login_required
