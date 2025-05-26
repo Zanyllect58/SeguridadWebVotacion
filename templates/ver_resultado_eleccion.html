@@ -1,27 +1,24 @@
 {% extends "dashboard.html" %}
 
-{% block title %}Resultados - {{ eleccion.nombre }}{% endblock %}
-
 {% block content %}
-<main class="container py-5">
-    <h2 class="mb-4 text-center">📊 Resultados de: <span class="text-primary">{{ eleccion.nombre }}</span></h2>
-
-    {% if resultados and eleccion.estado == 'finalizada' %}
-    <div class="alert alert-success text-center fs-5 shadow-sm">
-        🥇 El ganador es <strong>{{ resultados[0].candidato }}</strong> con <strong>{{ resultados[0].votos }}</strong> voto(s)
+<div class="container mt-4">
+    <div class="text-center mb-4">
+        <h2>📊 Resultados de: <span class="text-primary">{{ eleccion.nombre }}</span></h2>
+        {% if resultados %}
+            <h5 class="text-success">
+                🥇 Ganador: <strong>{{ resultados[0].candidato }}</strong> con <strong>{{ resultados[0].votos }}</strong> voto(s)
+            </h5>
+        {% else %}
+            <div class="alert alert-warning">No hay resultados disponibles para esta elección.</div>
+        {% endif %}
     </div>
-    {% elif resultados %}
-    <div class="alert alert-info text-center fs-6 shadow-sm">
-        ℹ️ Esta elección aún no ha finalizado. Los resultados pueden cambiar.
-    </div>
-    {% endif %}
 
-    <div class="table-responsive mt-4">
-        <table class="table table-bordered table-hover align-middle">
+    {% if resultados %}
+    <div id="tabla-a-exportar">
+        <table class="table table-bordered table-sm align-middle">
             <thead class="table-dark">
                 <tr>
                     <th>#</th>
-                    <th>Foto</th>
                     <th>Nombre</th>
                     <th>Usuario</th>
                     <th>Propuesta</th>
@@ -30,38 +27,91 @@
             </thead>
             <tbody>
                 {% for c in resultados %}
-                <tr class="{% if loop.index0 == 0 %}table-warning fw-bold{% endif %}">
+                <tr class="{% if loop.first %}table-warning fw-bold{% endif %}">
                     <td>{{ loop.index }}</td>
-                    <td>
-                        {% set perfil = c.get('profile') %}
-                        <img src="{{ url_for('uploaded_file', filename=perfil.profile_picture if perfil and perfil.profile_picture else 'default.jpg') }}"
-                             alt="Foto del candidato"
-                             class="rounded-circle shadow-sm"
-                             style="width: 40px; height: 40px; object-fit: cover; cursor: pointer;"
-                             onclick="showImageInModal(this.src)">
-                    </td>
                     <td>{{ c.candidato }}</td>
-                    <td><code>@{{ c.username }}</code></td>
+                    <td>@{{ c.username }}</td>
                     <td>{{ c.propuesta }}</td>
-                    <td><span class="badge bg-primary px-3 py-2">{{ c.votos }}</span></td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="6" class="text-center text-muted">No hay candidatos registrados para esta elección.</td>
+                    <td><strong>{{ c.votos }}</strong></td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 
-    <!-- Gráficos y botones aquí -->
-    <!-- ... -->
+    <div class="chart-container mt-5 no-print">
+        <h6 class="text-center">📈 Votos por Candidato (Gráfico de Barras)</h6>
+        <canvas id="barChart" height="100"></canvas>
+    </div>
+    {% endif %}
 
-</main>
+    <div class="no-print text-center mt-5">
+        <a href="{{ url_for('resultados_elecciones') }}" class="btn btn-secondary">← Volver</a>
+        <button onclick="imprimirTabla()" class="btn btn-success">🖨️ Exportar solo tabla</button>
+    </div>
+</div>
 
-<!-- Modal y demás -->
-{% endblock %}
+<!-- Chart.js Script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const ctx = document.getElementById('barChart').getContext('2d');
 
-{% block scripts %}
-<!-- Scripts para modal y gráficos aquí -->
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [{% for c in resultados %}"{{ c.candidato }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+                datasets: [{
+                    label: 'Votos',
+                    data: [{% for c in resultados %}{{ c.votos }}{% if not loop.last %}, {% endif %}{% endfor %}],
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: true }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        precision: 0,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    });
+
+    function imprimirTabla() {
+        const contenido = document.getElementById('tabla-a-exportar').innerHTML;
+        const ventana = window.open('', '', 'height=700,width=900');
+        ventana.document.write('<html><head><title>Exportar Resultados</title>');
+        ventana.document.write('<style>table { width: 100%; border-collapse: collapse; } table, th, td { border: 1px solid black; padding: 8px; text-align: center; }</style>');
+        ventana.document.write('</head><body>');
+        ventana.document.write(contenido);
+        ventana.document.write('</body></html>');
+        ventana.document.close();
+        ventana.print();
+    }
+</script>
+
+<style>
+    @media print {
+        .no-print, .chart-container, h2, h5 {
+            display: none !important;
+        }
+        body {
+            -webkit-print-color-adjust: exact;
+        }
+        .table th, .table td {
+            border: 1px solid #000 !important;
+        }
+    }
+</style>
 {% endblock %}

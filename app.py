@@ -366,6 +366,7 @@ def ver_resultado_eleccion_print(eleccion_id):
 
 
 
+
 #------------------------------------------
 #            ENDPOINT ACTUALIZAR
 #------------------------------------------
