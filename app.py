@@ -1,6 +1,6 @@
 import os
 import time
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, abort
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_wtf.csrf import CSRFProtect
 import requests
@@ -9,7 +9,7 @@ from flask_reuploads import UploadSet, configure_uploads, IMAGES
 
 from models import FailedLoginAttempt, IdentificationChangeLog, UserProfile, UserRole, Voto, db, User
 from config import Config
-from forms import ChangePasswordForm, EditIdentificacionForm, EditProfileForm, EditarEleccionForm, LoginForm, RegisterForm
+from forms import ChangePasswordForm, EditIdentificacionForm, EditProfileForm, EditUserForm, EditarEleccionForm, LoginForm, RegisterForm
 from flask import send_from_directory
 
 from flask import send_file
@@ -390,9 +390,11 @@ def mis_votaciones():
 
     votos = Voto.query.filter_by(userId=current_user.id).all()
     return render_template('mis_votaciones.html', votos=votos)
+
 #------------------------------------------
 #            ENDPOINT ACTUALIZAR
 #------------------------------------------
+
 # Ruta para editar perfil
 @app.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
@@ -406,6 +408,40 @@ def edit_profile():
 def edit_identificacion():
     # Lógica aquí para editar la identificación
     return render_template('edit_identificacion.html', user=current_user)
+
+@app.route('/admin/editar_usuario/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+def editar_usuario_admin(user_id):
+    # Solo admins pueden acceder
+    if not current_user.is_admin:
+        abort(403)
+
+    # El admin no puede editarse a sí mismo
+    if current_user.id == user_id:
+        flash('No puedes editar tu propia información desde este panel.', 'warning')
+        return redirect(url_for('listar_usuarios'))
+
+    user = User.query.get_or_404(user_id)
+    form = EditUserForm(obj=user)
+
+    if form.validate_on_submit():
+        user.identificacion = form.identificacion.data
+        user.nombres = form.nombres.data
+        user.apellidos = form.apellidos.data
+        user.email = form.email.data
+        user.edad = form.edad.data
+        user.genero = form.genero.data
+
+        try:
+            db.session.commit()
+            flash('Usuario actualizado correctamente.', 'success')
+            return redirect(url_for('listar_usuarios'))  # Cambia esta redirección según tu estructura
+        except Exception as e:
+            db.session.rollback()
+            flash('Error al actualizar el usuario.', 'danger')
+            print(f"Error: {e}")
+
+    return render_template('editar_usuario.html', form=form, user=user)
 
 
 @app.route('/eleccion/<int:eleccion_id>/editar', methods=['GET', 'POST'])
