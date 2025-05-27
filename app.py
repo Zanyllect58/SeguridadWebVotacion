@@ -160,7 +160,7 @@ def logout():
 @app.route('/register/<role>', methods=['GET', 'POST'])
 @login_required
 def register(role):
-    if current_user.role != UserRole.ADMIN:
+    if current_user.role not in [UserRole.ADMIN, UserRole.ADMINISTRATIVO]:
         flash("No tienes permisos para crear usuarios.", "danger")
         return redirect(url_for('dashboard'))
     
@@ -266,12 +266,56 @@ def listar_usuarios():
 
     return render_template('listar_usuarios.html', usuarios=usuarios, search=search, role_filter=role_filter)
 
+#Ruta para listar los votantes
+@app.route('/listar_votantes')
+@login_required
+def listar_votantes():
+    if current_user.role not in [UserRole.ADMIN, UserRole.ADMINISTRATIVO]:
+        flash("Acceso denegado. Solo el administrador puede ver esta sección.", "danger")
+        return redirect(url_for('dashboard'))
+
+    search = request.args.get('search', '', type=str)
+
+    # Solo usuarios con role votante
+    query = User.query.filter(
+        (User.id != current_user.id) &
+        (User.role == UserRole.VOTANTE)
+    )
+
+    if search:
+        query = query.filter(
+            (User.username.ilike(f"%{search}%")) |
+            (User.identificacion.ilike(f"%{search}%"))
+        )
+
+    users = query.all()
+
+    def user_to_dict(user):
+        return {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'identificacion': user.identificacion,
+            'role': user.role.value if hasattr(user.role, 'value') else str(user.role)
+        }
+
+    usuarios = [user_to_dict(u) for u in users]
+
+    return render_template(
+        'listar_usuarios.html',
+        usuarios=usuarios,
+        search=search,
+        role_filter='votante',
+        titulo='Lista de Votantes',
+        mostrar_filtro=False
+    )
+
 
 # Ruta para ver la lista de elecciones
 @app.route('/elecciones')
 @login_required
 def lista_elecciones():
-    if current_user.role != UserRole.ADMIN:
+    if current_user.role not in [UserRole.ADMIN, UserRole.ADMINISTRATIVO]:
         flash("Acceso denegado.", "danger")
         return redirect(url_for('dashboard'))
 
@@ -401,12 +445,12 @@ def mis_votaciones():
     votos = Voto.query.filter_by(userId=current_user.id).all()
     return render_template('mis_votaciones.html', votos=votos)
 
-#Ruta para gestionar los candidadotos desde crear, listar
+#Ruta para gestionar los candidatos desde crear, listar
 
 @app.route('/eleccion/<int:eleccion_id>/candidatos', methods=['GET', 'POST'])
 @login_required
 def gestionar_candidatos(eleccion_id):
-    if current_user.role != UserRole.ADMIN:
+    if current_user.role not in [UserRole.ADMIN, UserRole.ADMINISTRATIVO]:
         flash("Acceso denegado", "danger")
         return redirect(url_for('dashboard'))
 
@@ -465,7 +509,7 @@ def edit_identificacion():
 @login_required
 def editar_usuario_admin(user_id):
     print("Método de la petición:", request.method)
-    if current_user.role != UserRole.ADMIN:
+    if current_user.role not in [UserRole.ADMIN, UserRole.ADMINISTRATIVO]:
         flash("Acceso denegado.", "danger")
         return redirect(url_for('dashboard'))
     
@@ -479,13 +523,21 @@ def editar_usuario_admin(user_id):
         user.identificacion = form.identificacion.data
         user.username = form.username.data
         user.email = form.email.data
-        user.role = UserRole(form.role.data)
+        
+        # Solo el admin logueado puede cambiar rol
+        if current_user.role == UserRole.ADMIN:
+            user.role = UserRole(form.role.data)
+        else:
+            user.role = user.role    
        
 
         try:
             db.session.commit()
             flash('Usuario actualizado correctamente.', 'success')
-            return redirect(url_for('listar_usuarios'))  # Cambia esta redirección según tu estructura
+            if current_user.role == UserRole.ADMIN:
+                return redirect(url_for('listar_usuarios'))  
+            else:
+                return redirect(url_for('listar_votantes'))
         except Exception as e:
             db.session.rollback()
             flash('Error al actualizar el usuario.', 'danger')

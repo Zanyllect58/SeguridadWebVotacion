@@ -34,22 +34,32 @@
                     {% endfor %}
                 </div>
 
-                <div class="mb-3">
-                    {{ form.role.label(class="form-label") }}
-                    {{ form.role(class="form-select") }}
-                    {% for error in form.role.errors %}
-                        <div class="text-danger small">{{ error }}</div>
-                    {% endfor %}
-                </div>
-
+                {% if current_user.role.value == 'admin' %}
+                    <div class="mb-3">
+                        {{ form.role.label(class="form-label") }}
+                        {{ form.role(class="form-select") }}
+                        {% for error in form.role.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <input type="hidden" name="role" value="{{ form.role.data }}">
+                {% endif %}
                 <div class="d-flex justify-content-between">
+                    {% if current_user.role.value == 'admin' %}
                     <a href="{{ url_for('listar_usuarios') }}" class="btn btn-outline-secondary">
                         <i class="bi bi-arrow-left"></i> Volver
                     </a>
+                    {% elif current_user.role.value == 'administrativo' %}
+                    <a href="{{ url_for('listar_votantes') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Volver
+                    </a>
+                    {% endif %}
                     <button type="submit" class="btn btn-success">
-                       {{ form.submit.label }}
+                    {{ form.submit.label }}
                     </button>
                 </div>
+
             </form>
         </div>
     </div>

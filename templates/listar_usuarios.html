@@ -109,6 +109,7 @@
             <div class="col-md-4">
                <input type="text" id="searchInput" placeholder="Buscar por cualquier campo..." class="form-control mb-3" />
             </div>
+            {% if current_user.rol == 'admin' %}
             <div class="col-md-3">
                 <select name="role" class="form-select">
                     <option value="">-- Filtrar por rol --</option>
@@ -117,12 +118,15 @@
                     <option value="votante" {% if role_filter == 'votante' %}selected{% endif %}>Votante</option>
                 </select>
             </div>
+            
             <div class="col-md-2">
                 <button type="submit" class="btn btn-primary w-100">Buscar</button>
             </div>
+            
             <div class="col-md-2">
                 <a href="{{ url_for('listar_usuarios') }}" class="btn btn-secondary w-100">Limpiar</a>
             </div>
+            {% endif %}
         </form>
 
     <table class="table table-striped table-bordered">
@@ -219,10 +223,12 @@
                 <td class="text-center d-flex justify-content-center gap-2">
                     <button class="edit-btn btn btn-sm btn-primary" data-id="${user.id}">Editar</button>
 
+                    {% if current_user.rol == 'admin' %}
                     <button class="edit-password-btn btn btn-sm btn-warning" data-id="${user.id}">Editar contraseña</button>
 
 
-                    <button class="delete-btn btn btn-sm btn-danger" data-id="${user.id}">Eliminar</button>     
+                    <button class="delete-btn btn btn-sm btn-danger" data-id="${user.id}">Eliminar</button>   
+                    {% endif %}  
                 </td>
             `;
             tableBody.appendChild(tr);

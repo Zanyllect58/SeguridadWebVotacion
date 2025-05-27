@@ -355,7 +355,7 @@
                   Identificación</a
                 >
                 <a
-                  href="{{ url_for('logs_elecciones') }}"
+                  href="#"
                   class="btn btn-outline-info"
                   ><i class="bi bi-journal-text"></i> Cambios Elecciones</a
                 >
@@ -450,14 +450,42 @@
             >
               <div class="accordion-body d-grid gap-2">
                 <a
-                  href="{{ url_for('elecciones') }}"
+                  href="{{url_for('lista_elecciones')}}"
                   class="btn btn-outline-secondary"
-                  ><i class="bi bi-list-ul"></i> Ver Lista de Elecciones</a
+                  ><i class="bi bi-list-ul"></i>Lista de Elecciones</a
                 >
                 <a
                   href="{{ url_for('resultados_elecciones') }}"
                   class="btn btn-outline-success"
                   ><i class="bi bi-bar-chart"></i> Resultados</a
+                >
+              </div>
+            </div>
+          </div>
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingGestion">
+              <button
+                class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapseGestion"
+                aria-expanded="false"
+                aria-controls="collapseGestion"
+              >
+                <i class="bi bi-gear me-2"></i> Gestión
+              </button>
+            </h2>
+            <div
+              id="collapseGestion"
+              class="accordion-collapse collapse"
+              aria-labelledby="headingGestion"
+              data-bs-parent="#sidebarAccordion"
+            >
+              <div class="accordion-body d-grid gap-2">
+                <a
+                  href="{{ url_for('listar_votantes') }}"
+                  class="btn btn-outline-secondary"
+                  ><i class="bi bi-people"></i> Usuarios Votantes</a
                 >
               </div>
             </div>
