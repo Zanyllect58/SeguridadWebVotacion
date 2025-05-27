@@ -386,19 +386,19 @@
             >
               <div class="accordion-body d-grid gap-2">
                 <a
-                  href="{{ url_for('lista_elecciones') }}"
+                  href="{{ url_for('mis_elecciones_candidato') }}"
                   class="btn btn-outline-secondary"
-                  ><i class="bi bi-list-ul"></i> Ver Lista de Elecciones</a
+                  ><i class="bi bi-list-ul"></i> Mi Lista de Elecciones</a
                 >
                 <a
                   href="{{ url_for('resultados_elecciones') }}"
                   class="btn btn-outline-success"
-                  ><i class="bi bi-bar-chart"></i> Resultados</a
+                  ><i class="bi bi-bar-chart"></i>Mis Resultados</a
                 >
               </div>
             </div>
           </div>
-
+          <!-- Administrativo Role -->
           {% elif user_role == 'administrativo' %}
           <div class="accordion-item">
             <h2 class="accordion-header" id="headingRegistrarAdm">
@@ -517,6 +517,11 @@
                   href="{{ url_for('votaciones_disponibles') }}"
                   class="btn btn-outline-secondary"
                   ><i class="bi bi-list-ul"></i> Elecciones disponibles</a
+                >
+                <a
+                  href="{{ url_for('mis_votaciones') }}"
+                  class="btn btn-outline-secondary"
+                  ><i class="bi bi-ticket"></i> Mis votaciones</a
                 >
                 <a
                   href="{{ url_for('resultados_elecciones') }}"

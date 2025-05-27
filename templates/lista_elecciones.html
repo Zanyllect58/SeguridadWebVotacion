@@ -108,6 +108,8 @@
       <a href="{{ url_for('lista_elecciones') }}" class="btn btn-secondary">
         <i class="bi bi-arrow-clockwise"></i> Limpiar
       </a>
+
+
     </div>
   </form>
 
@@ -159,15 +161,17 @@
           <a href="{{ url_for('ver_eleccion', eleccion_id=eleccion.id) }}" class="btn btn-sm btn-info text-white" title="Ver">
             <i class="bi bi-eye"></i>
           </a>
-          {% if current_user.rol == 'admin' %}
+          {% if user_role == 'admin' %}
           <a href="{{ url_for('editar_eleccion', eleccion_id=eleccion.id) }}" class="btn btn-sm btn-outline-primary" title="Editar">
             <i class="bi bi-pencil-square"></i>
           </a>
           {% endif %}
+          {% if user_role|lower in ['admin', 'administrativo'] %}
           <a href="{{ url_for('gestionar_candidatos', eleccion_id=eleccion.id) }}" class="btn btn-success btn-sm" title="Candidatos">
             <i class="bi bi-people"></i>
           </a>
-          {% if current_user.rol == 'admin' %}
+          {% endif%}
+          {% if user_role == 'admin' %}
           <form method="POST" action="{{ url_for('eliminar_eleccion', eleccion_id=eleccion.id) }}"
                 class="d-inline"
                 onsubmit='return confirm("¿Estás seguro de que deseas eliminar la elección {{ eleccion.nombre }}?")'>

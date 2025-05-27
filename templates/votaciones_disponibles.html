@@ -1,0 +1,73 @@
+{% extends "dashboard.html" %}
+
+{% block title %}Elecciones Disponibles{% endblock %}
+
+{% block styles %}
+<style>
+.bg-blue-translucent {
+    background-color: rgba(0, 51, 102, 0.8);
+    backdrop-filter: blur(2px);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-2">
+    <div class="card shadow w-75 mx-auto">
+        <div class="card-header bg-blue-translucent text-white text-center">
+            <h4 class="mb-0">
+                <i class="bi bi-ballot-check me-2"></i>Elecciones Disponibles para Votar
+            </h4>
+        </div>
+        <div class="card-body">
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div id="flash-messages" class="mb-3">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% endwith %}
+
+            {% if elecciones %}
+            <div class="row">
+                {% for e in elecciones %}
+                <div class="col-md-6">
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="bi bi-megaphone-fill me-2"></i>{{ e.nombre }}
+                            </h5>
+                            <p class="card-text">
+                                <i class="bi bi-calendar-event me-1"></i><strong>Inicio:</strong> {{ e.fecha_inicio.strftime('%d/%m/%Y') }}<br>
+                                <i class="bi bi-calendar-check me-1"></i><strong>Fin:</strong> {{ e.fecha_fin.strftime('%d/%m/%Y') }}
+                            </p>
+                            <a href="{{ url_for('votar', eleccion_id=e.id) }}" class="btn btn-primary">
+                                <i class="bi bi-person-lines-fill me-1"></i>Ver Candidatos y Votar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info text-center">
+                <i class="bi bi-info-circle me-2"></i>No hay elecciones disponibles para votar.
+            </div>
+            {% endif %}
+
+            <div class="text-center mt-4">
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left-circle me-1"></i>Volver al Dashboard
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

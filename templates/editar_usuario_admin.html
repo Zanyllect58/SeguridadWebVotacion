@@ -46,11 +46,11 @@
                     <input type="hidden" name="role" value="{{ form.role.data }}">
                 {% endif %}
                 <div class="d-flex justify-content-between">
-                    {% if current_user.role.value == 'admin' %}
+                    {% if user_role == 'admin' %}
                     <a href="{{ url_for('listar_usuarios') }}" class="btn btn-outline-secondary">
                         <i class="bi bi-arrow-left"></i> Volver
                     </a>
-                    {% elif current_user.role.value == 'administrativo' %}
+                    {% elif user_role == 'administrativo' %}
                     <a href="{{ url_for('listar_votantes') }}" class="btn btn-outline-secondary">
                         <i class="bi bi-arrow-left"></i> Volver
                     </a>

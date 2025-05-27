@@ -362,8 +362,8 @@ def lista_elecciones():
 @app.route('/eleccion/<int:eleccion_id>')
 @login_required
 def ver_eleccion(eleccion_id):
-    if current_user.role != UserRole.ADMIN:
-        flash("Acceso denegado. Solo el administrador puede ver detalles de elecciones.", "danger")
+    if current_user.role not in [UserRole.ADMIN, UserRole.ADMINISTRATIVO, UserRole.CANDIDATO]:
+        flash("Acceso denegado. Solo el administrador, administrativo o el candidato puede ver detalles de elecciones.", "danger")
         return redirect(url_for('dashboard'))
 
     eleccion = Eleccion.query.get_or_404(eleccion_id)
@@ -373,7 +373,16 @@ def ver_eleccion(eleccion_id):
 @login_required
 def resultados_elecciones():
     elecciones = Eleccion.query.all()
-    return render_template('resultados_elecciones.html', elecciones=elecciones)  # Asegúrate de tener esta plantilla
+    
+    if current_user.role == UserRole.CANDIDATO:
+        candidaturas = Candidatura.query.filter_by(userId=current_user.id).all()
+        # Extraer las elecciones asociadas a esas candidaturas
+        elecciones = [candidatura.eleccion for candidatura in candidaturas]
+
+        # Evitar duplicados si el usuario puede tener múltiples candidaturas en la misma elección
+        elecciones = list(set(elecciones))
+    
+    return render_template('resultados_elecciones.html', elecciones=elecciones)  
 
 @app.route('/resultados/<int:eleccion_id>')
 @login_required
@@ -435,7 +444,7 @@ def votaciones_disponibles():
     elecciones = [e for e in elecciones if not Voto.query.filter_by(userId=current_user.id, eleccionId=e.id).first()]
     return render_template('votaciones_disponibles.html', elecciones=elecciones)
 
-@app.route('/mis-votaciones')
+@app.route('/mis_votaciones')
 @login_required
 def mis_votaciones():
     if current_user.role != UserRole.VOTANTE:
@@ -486,6 +495,24 @@ def gestionar_candidatos(eleccion_id):
     candidatos = Candidatura.query.filter_by(eleccionId=eleccion_id).all()
     return render_template('gestionar_candidatos.html', eleccion=eleccion, form=form, candidatos=candidatos)
 
+#Ruta para listar elecciones de los candidatos
+@app.route('/mis-elecciones')
+@login_required
+def mis_elecciones_candidato():
+    if current_user.role.value != 'candidato':
+        flash("Acceso denegado.", "danger")
+        return redirect(url_for('dashboard'))
+
+    # Obtener elecciones en las que participa el candidato actual
+    elecciones = (
+        db.session.query(Eleccion)
+        .join(Candidatura, Candidatura.eleccionId == Eleccion.id)
+        .filter(Candidatura.userId == current_user.id)
+        .order_by(desc(Eleccion.fecha_inicio))
+        .all()
+    )
+
+    return render_template('lista_elecciones.html', elecciones=elecciones)
 
 #------------------------------------------
 #            ENDPOINT ACTUALIZAR
