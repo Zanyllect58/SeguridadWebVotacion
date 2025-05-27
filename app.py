@@ -419,12 +419,15 @@ def editar_usuario_admin(user_id):
     
     user = User.query.get_or_404(user_id)
     form = EditUserForm(obj=user)
+    
+    if request.method == 'GET':
+       form.role.data = user.role.value
 
     if form.validate_on_submit():
         user.identificacion = form.identificacion.data
         user.username = form.username.data
         user.email = form.email.data
-        user.rol = form.rol.data
+        user.role = UserRole(form.role.data)
        
 
         try:
@@ -495,6 +498,25 @@ def change_password():
         return redirect(url_for('dashboard'))
 
     return render_template('change_password.html')  # Asegúrate de tener una plantilla para esta vista
+
+# Ruta para que el admin edite la contraseña de otros usuarios
+@app.route('/edit_user_password/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+def edit_user_password(user_id):
+    if current_user.role != UserRole.ADMIN:
+        flash("No tienes permisos para editar contraseñas.", "danger")
+        return redirect(url_for('dashboard'))
+
+    user = User.query.get_or_404(user_id)
+    form = ChangePasswordForm()
+
+    if form.validate_on_submit():
+        user.set_password(form.new_password.data)
+        db.session.commit()
+        flash(f"Contraseña de {user.username} actualizada", "success")
+        return redirect(url_for('dashboard'))
+
+    return render_template('edit_user_password.html', form=form, user=user)
 
 # Ruta para que el admin edite la contraseña de otros usuarios
 @app.route('/edit_user_password/<int:user_id>', methods=['GET', 'POST'])
