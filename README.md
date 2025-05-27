@@ -1,91 +1,87 @@
-# README de Proyecto de Seguridad Web de Votación
+# Proyecto de Aplicación Web de Votación
 
-## Descripción del Proyecto
-Este proyecto es una aplicación web diseñada para gestionar procesos de votación de forma segura. Permite la creación, edición y visualización de elecciones, así como la gestión de usuarios.
+## Descripción
+
+Este repositorio contiene una aplicación web diseñada para la gestión de elecciones y votaciones. Permite a los usuarios registrarse, crear elecciones, votar y ver los resultados en tiempo real.
 
 ## Estructura del Proyecto
-La estructura de directorios se organiza de la siguiente manera:
 
-```
-/seguridadadwebvotacion
-│
-├── __pycache__/
-│
-├── templates/
-│   ├── images/
-│   │   └── Color_Vertical_2.png
-│   ├── crear_eleccion.html
-│   ├── dashboard.html
-│   ├── editar_eleccion.html
-│   ├── footer.html
-│   ├── index.html
-│   ├── lista_elecciones.html
-│   ├── listar_usuarios.html
-│   ├── login.html
-│   ├── logs_elecciones.html
-│   ├── mis_votaciones.html
-│   ├── navbar.html
-│   ├── register.html
-│   ├── resultados_elecciones.html
-│   ├── ver_resultado_eleccion_print.html
-│   ├── ver_resultado_eleccion.html
-│   └── votaciones_disponibles.html
-│
-├── uploads/
-│   └── photos/
-│       └── default.jpg
-│
-├── .gitignore
-├── app.py
-├── config.py
-├── create_admin.py
-├── forms.py
-├── models.py
-└── README.md
-```
+### Directorio `templates`
 
-## Descripción de Archivos y Directorios
+Contiene los archivos HTML utilizados para renderizar las vistas de la aplicación.
 
-### Templates
-- **images/**: Contiene imágenes utilizadas en la interfaz.
-- **crear_eleccion.html**: HTML para crear una nueva elección.
-- **dashboard.html**: Interfaz principal del usuario.
-- **editar_eleccion.html**: Permite la edición de elecciones existentes.
-- **footer.html**: Pie de página común para todas las plantillas.
-- **index.html**: Página de inicio de la aplicación.
-- **lista_elecciones.html**: Muestra la lista de elecciones disponibles.
-- **listar_usuarios.html**: Muestra la lista de usuarios registrados.
-- **login.html**: Página de inicio de sesión.
-- **logs_elecciones.html**: Historial de logs de elecciones.
-- **mis_votaciones.html**: Muestra las votaciones realizadas por el usuario.
-- **navbar.html**: Barra de navegación común en toda la aplicación.
-- **register.html**: Página de registro de nuevos usuarios.
-- **resultados_elecciones.html**: Presenta los resultados de las elecciones.
-- **ver_resultado_eleccion_print.html**: Plantilla para imprimir resultados de elecciones.
-- **ver_resultado_eleccion.html**: Muestra el resultado específico de una elección.
-- **votaciones_disponibles.html**: Muestra las votaciones en curso.
+- **images**
+    - `crear_eleccion.html`: Página para crear una nueva elección.
+    - `dashboard.html`: Tablero principal de la aplicación.
+    - `edit_profile.html`: Formulario para editar el perfil del usuario.
+    - `edit_user_password.html`: Formulario para cambiar la contraseña del usuario.
+    - `editar_candidatura.html`: Página para editar la candidatura.
+    - `editar_eleccion.html`: Página para editar una elección existente.
+    - `editar_usuario_admin.html`: Página para editar los detalles del usuario administrador.
+    - `gestion_candidatos.html`: Gestión de candidatos en una elección.
+    - `index.html`: Página de inicio de la aplicación.
+    - `lista_elecciones.html`: Lista de elecciones disponibles.
+    - `listar_usuarios.html`: Listado de usuarios registrados.
+    - `login.html`: Página de inicio de sesión.
+    - `logs_identificaciones.html`: Registro de identificaciones de usuarios.
+    - `logs_votaciones.html`: Registro de votaciones.
+    - `mis_votaciones.html`: Página donde los usuarios pueden ver sus votaciones.
+    - `navbar.html`: Barra de navegación común.
+    - `register.html`: Página para el registro de nuevos usuarios.
+    - `resultados_elecciones.html`: Página de resultados de elecciones.
+    - `ver_eleccion.html`: Visualizar detalles de una elección específica.
+    - `ver_resultado_eleccion_print.html`: Vista para imprimir resultados de elecciones.
+    - `ver_resultado_eleccion.html`: Visualización de resultados de elecciones.
+    - `votaciones_disponibles.html`: Página que muestra elecciones disponibles para votar.
+    - `votar.html`: Página para realizar una votación.
 
-### Otros Archivos
-- **.gitignore**: Archivos y carpetas que Git debe ignorar.
-- **app.py**: Archivo principal que inicia la aplicación.
-- **config.py**: Configuración de la aplicación.
-- **create_admin.py**: Script para crear un usuario administrador.
-- **forms.py**: Definición de formularios utilizados en la aplicación.
-- **models.py**: Modelos de datos para la aplicación.
-- **README.md**: Este documento que describe el proyecto.
+### Directorio `uploads`
+
+Contiene archivos subidos por los usuarios.
+
+### Archivos Principales
+
+- `app.py`: Archivo principal de la aplicación donde se define la lógica y configuración del servidor.
+- `config.py`: Configuración de la aplicación, incluyendo las credenciales de la base de datos y otras variables de entorno.
+- `create_admin.py`: Script para crear un usuario administrador inicial.
+- `forms.py`: Definición de los formularios utilizados en la aplicación.
+- `models.py`: Definición de los modelos de datos para la base de datos.
+- `README.md`: Este archivo de documentación.
+
+## Requisitos
+
+- Python 3.x
+- Flask
+- Otras dependencias especificadas en `requirements.txt`.
 
 ## Instalación
-1. Clona el repositorio.
-2. Instala las dependencias necesarias.
-3. Configura la base de datos.
-4. Ejecuta `app.py` para iniciar la aplicación.
 
-## Contribuciones
-Las contribuciones son bienvenidas. Por favor, abre un issue o envía un pull request para discutir cambios.
+1. Clonar el repositorio:
+   ```bash
+   git clone <repository-url>
+   cd <repository-folder>
+   ```
+
+2. Instalar las dependencias:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. Configurar la base de datos y las variables de entorno.
+
+4. Ejecutar la aplicación:
+   ```bash
+   python app.py
+   ```
+
+## Contribución
+
+Las contribuciones son bienvenidas. Por favor, enviar un pull request o abrir un issue para discutir los cambios propuestos.
 
 ## Licencia
-Este proyecto está bajo la Licencia MIT. Para más detalles, consulta el archivo LICENSE.
 
----
+Este proyecto está bajo la licencia MIT. Consulta el archivo LICENSE para más detalles.
 
-¡Gracias por tu interés en el Proyecto de Seguridad Web de Votación!
+--- 
+
+¡Sigue estas instrucciones para iniciar y utilizar la aplicación de votaciones exitosamente!

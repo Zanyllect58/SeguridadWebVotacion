@@ -918,17 +918,12 @@ def eliminar_candidatura(candidatura_id):
 #------------------------------------------
 
 
-@app.route('/logs_identificaciones', methods=['GET'])
+
+@app.route('/logs_identificaciones')
 @login_required
 def logs_identificaciones():
-    # Aquí deberías incluir la lógica para mostrar los logs de las identificaciones
-    return render_template('logs_identificaciones.html')  # Asegúrate de tener esta plantilla creada
-
-@app.route('/logs_elecciones', methods=['GET'])
-@login_required
-def logs_elecciones():
-    # Aquí deberías incluir la lógica para mostrar los logs de las elecciones
-    return render_template('logs_elecciones.html')  # Asegúrate de tener esta plantilla creada
+    logs = IdentificationChangeLog.query.order_by(IdentificationChangeLog.timestamp.desc()).all()
+    return render_template('logs_identificaciones.html', logs=logs)
 
 #------------------------------------------
 
