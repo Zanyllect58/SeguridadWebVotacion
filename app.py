@@ -447,12 +447,54 @@ def gestionar_candidatos(eleccion_id):
 #            ENDPOINT ACTUALIZAR
 #------------------------------------------
 
-# Ruta para editar perfil
 @app.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
-    # Lógica aquí para editar el perfil
-    return render_template('edit_profile.html', user=current_user)
+    form = EditProfileForm()
+
+    if not current_user.profile:
+        current_user.profile = UserProfile(user_identificacion=current_user.identificacion)
+        db.session.add(current_user.profile)
+        db.session.commit()
+
+    if form.validate_on_submit():
+        if form.profile_picture.data:
+            filename = secure_filename(form.profile_picture.data.filename)
+            allowed_extensions = {'jpg', 'jpeg', 'png'}
+            if filename.split('.')[-1].lower() not in allowed_extensions:
+                flash('Formato de imagen no válido.', 'danger')
+                return redirect(url_for('edit_profile'))
+
+            upload_folder = app.config['UPLOADED_PHOTOS_DEST']
+            os.makedirs(upload_folder, exist_ok=True)
+            filepath = os.path.join(upload_folder, filename)
+            form.profile_picture.data.save(filepath)
+            current_user.profile.profile_picture = filename
+
+        # Asignar campos actualizados
+        current_user.profile.nombres = form.nombres.data
+        current_user.profile.apellidos = form.apellidos.data
+        current_user.profile.edad = form.edad.data
+        current_user.profile.genero = form.genero.data
+        current_user.profile.bio = form.bio.data
+        current_user.profile.language_preference = form.language_preference.data
+        current_user.profile.notifications_enabled = form.notifications_enabled.data
+
+        db.session.commit()
+        flash('¡Perfil actualizado con éxito!', 'success')
+        return redirect(url_for('dashboard'))
+
+    # Prellenar formulario con datos existentes
+    profile = current_user.profile
+    form.nombres.data = profile.nombres
+    form.apellidos.data = profile.apellidos
+    form.edad.data = profile.edad
+    form.genero.data = profile.genero
+    form.bio.data = profile.bio
+    form.language_preference.data = profile.language_preference
+    form.notifications_enabled.data = profile.notifications_enabled
+
+    return render_template('edit_profile.html', form=form)
 
 # Ruta para editar identificación (si es necesario)
 @app.route('/edit_identificacion', methods=['GET', 'POST'])

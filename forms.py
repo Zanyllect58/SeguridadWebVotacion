@@ -31,6 +31,7 @@ class RegisterForm(FlaskForm):
 class EditProfileForm(FlaskForm):
     nombres = StringField('Nombres', validators=[DataRequired(), Length(max=255)])
     apellidos = StringField('Apellidos', validators=[DataRequired(), Length(max=255)])
+    edad = IntegerField('Edad', validators=[NumberRange(min=0, max=120)])
     email = StringField('Email', validators=[DataRequired(), Length(max=255)])
     genero = SelectField('Género', choices=[
         ('masculino', 'Masculino'),
