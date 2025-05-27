@@ -315,6 +315,16 @@ def lista_elecciones():
 
     return render_template('lista_elecciones.html', elecciones=elecciones)
 
+@app.route('/eleccion/<int:eleccion_id>')
+@login_required
+def ver_eleccion(eleccion_id):
+    if current_user.role != UserRole.ADMIN:
+        flash("Acceso denegado. Solo el administrador puede ver detalles de elecciones.", "danger")
+        return redirect(url_for('dashboard'))
+
+    eleccion = Eleccion.query.get_or_404(eleccion_id)
+    return render_template('ver_eleccion.html', eleccion=eleccion)
+
 @app.route('/resultados_elecciones')
 @login_required
 def resultados_elecciones():
@@ -390,6 +400,48 @@ def mis_votaciones():
 
     votos = Voto.query.filter_by(userId=current_user.id).all()
     return render_template('mis_votaciones.html', votos=votos)
+
+#Ruta para gestionar los candidadotos desde crear, listar
+
+@app.route('/eleccion/<int:eleccion_id>/candidatos', methods=['GET', 'POST'])
+@login_required
+def gestionar_candidatos(eleccion_id):
+    if current_user.role != UserRole.ADMIN:
+        flash("Acceso denegado", "danger")
+        return redirect(url_for('dashboard'))
+
+    eleccion = Eleccion.query.get_or_404(eleccion_id)
+    form = AgregarCandidaturaForm()
+    
+    # Opciones para seleccionar usuarios candidatos
+    form.user_id.choices = [
+        (u.id, f"{u.username} - ({u.identificacion})")
+        for u in User.query.filter_by(role=UserRole.CANDIDATO).all()
+    ]
+
+    if form.validate_on_submit():
+        # Validar si el candidato ya existe para esta elección
+        existente = Candidatura.query.filter_by(
+            userId=form.user_id.data,
+            eleccionId=eleccion_id
+        ).first()
+
+        if existente:
+            flash("⚠️ Este usuario ya está registrado como candidato en esta elección.", "warning")
+        else:
+            nueva = Candidatura(
+                userId=form.user_id.data,
+                eleccionId=eleccion_id,
+                propuesta=form.propuesta.data
+            )
+            db.session.add(nueva)
+            db.session.commit()
+            flash("✅ Candidato agregado exitosamente", "success")
+        return redirect(url_for('gestionar_candidatos', eleccion_id=eleccion_id))
+
+    candidatos = Candidatura.query.filter_by(eleccionId=eleccion_id).all()
+    return render_template('gestionar_candidatos.html', eleccion=eleccion, form=form, candidatos=candidatos)
+
 
 #------------------------------------------
 #            ENDPOINT ACTUALIZAR
@@ -577,6 +629,61 @@ def edit_user_identificacion(user_id):
 
     return render_template('listar_usuarios.html', form=form, user=user)
 
+# Ruta para editar una candidatura
+@app.route('/candidatura/<int:candidatura_id>/editar', methods=['GET', 'POST'])
+@login_required
+def editar_candidatura(candidatura_id):
+    if current_user.role != UserRole.ADMIN:
+        flash("Acceso denegado.", "danger")
+        return redirect(url_for('dashboard'))
+
+    candidatura = Candidatura.query.get_or_404(candidatura_id)
+    eleccion_id = candidatura.eleccionId
+
+    form = AgregarCandidaturaForm(obj=candidatura)
+
+    # Obtener IDs ya usados, excepto el actual
+    usados = db.session.query(Candidatura.userId).filter(
+        Candidatura.eleccionId == eleccion_id,
+        Candidatura.id != candidatura.id
+    ).all()
+    usados_ids = {uid for (uid,) in usados}
+
+    # Armar opciones deshabilitadas si ya están en la elección
+    choices = []
+    for u in User.query.filter_by(role=UserRole.CANDIDATO).all():
+        disabled = u.id in usados_ids
+        choices.append((u.id, f"{u.username} - ({u.identificacion})", disabled))
+
+    # Asignar choices al campo user_id (WTForms no permite directamente "disabled", así que lo pasamos a la vista)
+    form.user_id.choices = [(id, label) for id, label, _ in choices]
+    disabled_user_ids = [id for id, _, d in choices if d]
+
+    form.user_id.data = candidatura.userId
+
+    if form.validate_on_submit():
+        duplicado = Candidatura.query.filter(
+            Candidatura.userId == form.user_id.data,
+            Candidatura.eleccionId == eleccion_id,
+            Candidatura.id != candidatura.id
+        ).first()
+
+        if duplicado:
+            flash("⚠️ Este usuario ya está registrado como candidato en esta elección.", "warning")
+        else:
+            candidatura.userId = form.user_id.data
+            candidatura.propuesta = form.propuesta.data
+            db.session.commit()
+            flash("✅ Candidatura actualizada con éxito.", "success")
+            return redirect(url_for('gestionar_candidatos', eleccion_id=eleccion_id))
+
+    for field, errors in form.errors.items():
+        for error in errors:
+            flash(f"⚠️ {error}", "warning")
+
+    return render_template('editar_candidatura.html', form=form, candidatura=candidatura, disabled_user_ids=disabled_user_ids)
+
+
 # Ruta para votar en una elección
 @app.route('/votar/<int:eleccion_id>', methods=['GET', 'POST'])
 @login_required
@@ -665,6 +772,26 @@ def eliminar_eleccion(eleccion_id):
     return redirect(url_for('lista_elecciones'))
 
 
+# Ruta para eliminar una candidatura
+@app.route('/candidatura/<int:candidatura_id>/eliminar', methods=['POST'])
+@login_required
+def eliminar_candidatura(candidatura_id):
+    if current_user.role != UserRole.ADMIN:
+        flash("Acceso denegado. Solo el administrador puede eliminar candidaturas.", "danger")
+        return redirect(url_for('dashboard'))
+
+    candidatura = Candidatura.query.get_or_404(candidatura_id)
+    eleccion_id = candidatura.eleccionId
+
+    try:
+        db.session.delete(candidatura)
+        db.session.commit()
+        flash("Candidatura eliminada exitosamente.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Ocurrió un error al eliminar la candidatura: {str(e)}", "danger")
+
+    return redirect(url_for('gestionar_candidatos', eleccion_id=eleccion_id))
 #------------------------------------------
 #            ENDPOINT LOGS
 #------------------------------------------
