@@ -554,7 +554,7 @@ def change_password():
 # Ruta para que el admin edite la contraseña de otros usuarios
 @app.route('/edit_user_password/<int:user_id>', methods=['GET', 'POST'])
 @login_required
-def edit_user_password(user_id):
+def edit_password_user(user_id):
     if current_user.role != UserRole.ADMIN:
         flash("No tienes permisos para editar contraseñas.", "danger")
         return redirect(url_for('dashboard'))
@@ -566,7 +566,7 @@ def edit_user_password(user_id):
         user.set_password(form.new_password.data)
         db.session.commit()
         flash(f"Contraseña de {user.username} actualizada", "success")
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('listar_usuarios'))
 
     return render_template('edit_user_password.html', form=form, user=user)
 

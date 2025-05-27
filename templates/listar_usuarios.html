@@ -133,7 +133,7 @@
                 <th class="sortable" data-column="email">Email</th>
                 <th class="sortable" data-column="identificacion">Identificación</th>
                 <th class="sortable" data-column="role">Rol</th>
-                <th>Acciones</th>
+                <th >Acciones</th>
             </tr>
         </thead>
         <tbody id="tableBody"></tbody>
@@ -216,15 +216,13 @@
                 <td>${user.email}</td>
                 <td>${user.identificacion}</td>
                 <td>${user.role}</td>
-                <td>
+                <td class="text-center d-flex justify-content-center gap-2">
                     <button class="edit-btn btn btn-sm btn-primary" data-id="${user.id}">Editar</button>
 
-                    <button class="delete-btn btn btn-sm btn-danger" data-id="${user.id}">Eliminar</button>
+                    <button class="edit-password-btn btn btn-sm btn-warning" data-id="${user.id}">Editar contraseña</button>
 
-                    
 
-                  
-                    
+                    <button class="delete-btn btn btn-sm btn-danger" data-id="${user.id}">Eliminar</button>     
                 </td>
             `;
             tableBody.appendChild(tr);
@@ -272,6 +270,14 @@
             }
         });
     });
+
+    document.querySelectorAll('.edit-password-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        const id = parseInt(e.target.dataset.id);
+        window.location.href = `/edit_user_password/${id}`;  // Aquí se usa el endpoint correcto
+      });
+   } );
+
 
         
     }
