@@ -1,16 +1,12 @@
 from flask_wtf import FlaskForm
-from wtforms import SelectField, StringField, PasswordField, SubmitField, TextAreaField, BooleanField
-from wtforms.validators import DataRequired, Length
-from flask_wtf.file import FileField, FileAllowed  # Importar FileField y FileAllowed para subida de archivos 
-from wtforms.fields import DateTimeLocalField, SelectField
-from wtforms import ValidationError
-from datetime import datetime
-from wtforms import StringField, TextAreaField, SelectField, DateTimeField, SubmitField
-from wtforms.validators import DataRequired, ValidationError
-from models import Candidatura, UserRole
-from wtforms import StringField, TextAreaField, SelectField, BooleanField, SubmitField, IntegerField
-from wtforms.validators import DataRequired, Length, NumberRange
 from flask_wtf.file import FileField, FileAllowed
+from wtforms import (
+    StringField, TextAreaField, SelectField, 
+    PasswordField, BooleanField, SubmitField, 
+    IntegerField, DateTimeField
+)
+from wtforms.validators import DataRequired, Length, NumberRange, ValidationError
+from models import Candidatura, UserRole
 
 
 
