@@ -3,7 +3,7 @@ from flask_wtf.file import FileField, FileAllowed
 from wtforms import (
     StringField, TextAreaField, SelectField, 
     PasswordField, BooleanField, SubmitField, 
-    IntegerField, DateTimeField
+    IntegerField, DateTimeLocalField
 )
 from wtforms.validators import DataRequired, Length, NumberRange, ValidationError
 from models import Candidatura, UserRole
