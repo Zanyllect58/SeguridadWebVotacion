@@ -176,8 +176,8 @@
                     </select>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" id="cancelBtn" class="btn btn-secondary">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="button" id="cancelBtn" class="btn btn-secondary"></button>
+                    <!--<button type="submit" class="btn btn-primary">Guardar</button> -->
                 </div>
             </form>
         </div>
@@ -221,14 +221,15 @@
                 <td>${user.identificacion}</td>
                 <td>${user.role}</td>
                 <td class="text-center d-flex justify-content-center gap-2">
-                    <button class="edit-btn btn btn-sm btn-primary" data-id="${user.id}">Editar</button>
-
-                    
-                    <button class="edit-password-btn btn btn-sm btn-warning" data-id="${user.id}">Editar contraseña</button>
-
-
-                    <button class="delete-btn btn btn-sm btn-danger" data-id="${user.id}">Eliminar</button>   
-                  
+                    <button class="edit-btn btn btn-sm btn-primary" data-id="${user.id}">
+                        <i class="bi bi-pencil-square me-1"></i> Editar
+                    </button>
+                    <button class="edit-password-btn btn btn-sm btn-warning" data-id="${user.id}">
+                        <i class="bi bi-key-fill me-1"></i> Contraseña
+                    </button>
+                    <button class="delete-btn btn btn-sm btn-danger" data-id="${user.id}">
+                        <i class="bi bi-trash-fill me-1"></i> Eliminar
+                    </button>   
                 </td>
             `;
             tableBody.appendChild(tr);
