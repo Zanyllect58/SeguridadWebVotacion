@@ -21,7 +21,8 @@
       .sidebar {
         min-width: 250px;
         max-width: 300px;
-        height: 100vh;
+        min-height: 100vh;
+
         background-color: rgba(
           33,
           37,
@@ -34,6 +35,7 @@
         padding: 1rem;
         border-right: 1px solid rgba(255, 255, 255, 0.1);
         overflow-y: auto;
+        
       }
 
       .sidebar h5 {
@@ -208,8 +210,8 @@
       </div>
     </nav>
 
-    <div class="d-flex">
-      <nav class="sidebar" id="sidebar">
+    <div class="d-flex ">
+      <nav class="sidebar flex-grow-1" id="sidebar">
         <!-- Rol y descripción -->
         {% set role_descriptions = { 'admin': 'Acceso completo para gestionar
         usuarios, elecciones y configuraciones.', 'candidato': 'Puede ver
@@ -520,7 +522,7 @@
         </div>
       </nav>
 
-      <main class="flex-grow-1 p-4">
+      <main class=" flex-grow-1 p-4">
         <!-- Alertas Flash -->
         {% with messages = get_flashed_messages(with_categories=true) %} {% if
         messages %}
