@@ -26,7 +26,10 @@ from datetime import datetime
 from models import Candidatura
 from forms import AgregarCandidaturaForm
 from forms import VotarForm
+from dotenv import load_dotenv  # Importar dotenv para manejar variables de entorno
 
+# Cargar variables de entorno
+load_dotenv()
 
 app = Flask(__name__)
 app.config.from_object(Config)
