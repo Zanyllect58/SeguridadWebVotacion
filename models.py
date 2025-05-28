@@ -59,7 +59,7 @@ class UserProfile(db.Model):
     )
     nombres = db.Column(db.String(255), nullable=True)
     apellidos = db.Column(db.String(255), nullable=True)
-    email = db.Column(db.String(255), nullable=True)
+    
     edad = db.Column(db.Integer, nullable=True)
     genero = db.Column(db.Enum('masculino', 'femenino', 'otro'), nullable=True)
     profile_picture = db.Column(db.String(255), nullable=True)

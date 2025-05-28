@@ -168,6 +168,10 @@ def register(role):
     if form.validate_on_submit():
         email = form.email.data
         username = form.username.data
+        #nombres = form.nombres.data
+        #apellidos = form.apellidos.data
+        email = form.email.data
+        #genero = form.genero.data
         password = form.password.data
         identificacion = form.identificacion.data
 
@@ -566,6 +570,7 @@ def edit_profile():
     form.notifications_enabled.data = profile.notifications_enabled
 
     return render_template('edit_profile.html', form=form)
+
 
 # Ruta para editar identificación (si es necesario)
 @app.route('/edit_identificacion', methods=['GET', 'POST'])

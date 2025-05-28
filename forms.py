@@ -23,8 +23,11 @@ class LoginForm(FlaskForm): # Formulario de inicio de sesión
 class RegisterForm(FlaskForm):
     identificacion = StringField('Identificación', validators=[DataRequired(), Length(min=5, max=20)])  # NUEVO CAMPO
     username = StringField('Usuario', validators=[DataRequired(), Length(min=4, max=50)])
+    
     email =  StringField('Email', validators=[DataRequired(), Length(min=4, max=60)])
     password = PasswordField('Contraseña', validators=[DataRequired()])
+    
+   
     submit = SubmitField('Registrar')
 
 
@@ -32,7 +35,6 @@ class EditProfileForm(FlaskForm):
     nombres = StringField('Nombres', validators=[DataRequired(), Length(max=255)])
     apellidos = StringField('Apellidos', validators=[DataRequired(), Length(max=255)])
     edad = IntegerField('Edad', validators=[NumberRange(min=0, max=120)])
-    email = StringField('Email', validators=[DataRequired(), Length(max=255)])
     genero = SelectField('Género', choices=[
         ('masculino', 'Masculino'),
         ('femenino', 'Femenino'),

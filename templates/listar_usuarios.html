@@ -223,12 +223,12 @@
                 <td class="text-center d-flex justify-content-center gap-2">
                     <button class="edit-btn btn btn-sm btn-primary" data-id="${user.id}">Editar</button>
 
-                    {% if current_user.rol == 'admin' %}
+                    
                     <button class="edit-password-btn btn btn-sm btn-warning" data-id="${user.id}">Editar contraseña</button>
 
 
                     <button class="delete-btn btn btn-sm btn-danger" data-id="${user.id}">Eliminar</button>   
-                    {% endif %}  
+                  
                 </td>
             `;
             tableBody.appendChild(tr);
