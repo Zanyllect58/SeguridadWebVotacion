@@ -561,6 +561,7 @@ def edit_profile():
 
     # Prellenar formulario con datos existentes
     profile = current_user.profile
+   
     form.nombres.data = profile.nombres
     form.apellidos.data = profile.apellidos
     form.edad.data = profile.edad
@@ -572,12 +573,6 @@ def edit_profile():
     return render_template('edit_profile.html', form=form)
 
 
-# Ruta para editar identificación (si es necesario)
-@app.route('/edit_identificacion', methods=['GET', 'POST'])
-@login_required
-def edit_identificacion():
-    # Lógica aquí para editar la identificación
-    return render_template('edit_identificacion.html', user=current_user)
 
 @app.route('/admin/editar_usuario/<int:user_id>', methods=['GET', 'POST'])
 @login_required
@@ -662,20 +657,54 @@ def editar_eleccion(eleccion_id):
 
     return render_template('editar_eleccion.html', form=form, eleccion=eleccion)
 
-# Ruta para cambiar la contraseña
+@app.route('/edit_identificacion', methods=['GET', 'POST']) # Ruta para que el admin edite su propia identificación
+@login_required
+def edit_identificacion():
+    form = EditIdentificacionForm()
+
+    if form.validate_on_submit():
+        nueva_identificacion = form.nueva_identificacion.data
+
+        existing_user = User.query.filter_by(identificacion=nueva_identificacion, role=current_user.role).first()
+        if existing_user:
+            flash('Ya existe un usuario con esa identificación en el mismo rol.', 'danger')
+            return redirect(url_for('edit_identificacion'))
+
+        try:
+            old_identificacion = current_user.identificacion
+            current_user.identificacion = nueva_identificacion
+
+            # Registrar el cambio en logs
+            log = IdentificationChangeLog(
+                changed_by_user_id=current_user.id,
+                affected_user_id=current_user.id,
+                old_identificacion=old_identificacion,
+                new_identificacion=nueva_identificacion
+            )
+            db.session.add(log)
+
+            db.session.commit()
+            flash('Identificación actualizada exitosamente.', 'success')
+            return redirect(url_for('dashboard'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Ocurrió un error al actualizar: {str(e)}', 'danger')
+
+    return render_template('edit_identificacion.html', form=form)
+
+#Ruta para que el admin cambie su propia contraseña
 @app.route('/change_password', methods=['GET', 'POST'])
 @login_required
 def change_password():
-    if request.method == 'POST':
-        # Lógica para cambiar la contraseña
-        old_password = request.form['old_password']
-        new_password = request.form['new_password']
-        # Aquí deberías implementar la lógica para verificar y actualizar la contraseña
+    form = ChangePasswordForm()
 
-        flash('Contraseña cambiada correctamente', 'success')
+    if form.validate_on_submit():
+        current_user.set_password(form.new_password.data)
+        db.session.commit()
+        flash("Contraseña actualizada exitosamente", "success")
         return redirect(url_for('dashboard'))
 
-    return render_template('change_password.html')  # Asegúrate de tener una plantilla para esta vista
+    return render_template('change_password.html', form=form) # Asegúrate de tener una plantilla para esta vista
 
 # Ruta para que el admin edite la contraseña de otros usuarios
 @app.route('/edit_user_password/<int:user_id>', methods=['GET', 'POST'])
@@ -696,28 +725,11 @@ def edit_password_user(user_id):
 
     return render_template('edit_user_password.html', form=form, user=user)
 
-# Ruta para que el admin edite la contraseña de otros usuarios
-@app.route('/edit_user_password/<int:user_id>', methods=['GET', 'POST'])
-@login_required
-def edit_user_password(user_id):
-    if current_user.role != UserRole.ADMIN:
-        flash("No tienes permisos para editar contraseñas.", "danger")
-        return redirect(url_for('dashboard'))
 
-    user = User.query.get_or_404(user_id)
-    form = ChangePasswordForm()
-
-    if form.validate_on_submit():
-        user.set_password(form.new_password.data)
-        db.session.commit()
-        flash(f"Contraseña de {user.username} actualizada", "success")
-        return redirect(url_for('dashboard'))
-
-    return render_template('listar_usuarios.html', form=form, user=user)
 
 @app.route('/edit_user_identificacion/<int:user_id>', methods=['GET', 'POST']) # Ruta para que el admin edite la identificación de otros usuarios
 @login_required
-def edit_user_identificacion(user_id):
+def edit_identificacion_user(user_id):
     if current_user.role != UserRole.ADMIN:
         flash("Acceso denegado. Solo el administrador puede editar identificaciones.", "danger")
         return redirect(url_for('dashboard'))
