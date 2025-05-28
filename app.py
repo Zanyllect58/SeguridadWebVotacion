@@ -685,7 +685,7 @@ def edit_identificacion():
 
             db.session.commit()
             flash('Identificación actualizada exitosamente.', 'success')
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('edit_profile'))
         except Exception as e:
             db.session.rollback()
             flash(f'Ocurrió un error al actualizar: {str(e)}', 'danger')
@@ -702,7 +702,7 @@ def change_password():
         current_user.set_password(form.new_password.data)
         db.session.commit()
         flash("Contraseña actualizada exitosamente", "success")
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('edit_profile'))
 
     return render_template('change_password.html', form=form) # Asegúrate de tener una plantilla para esta vista
 
