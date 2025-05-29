@@ -523,7 +523,8 @@
       </nav>
 
       <main class=" flex-grow-1 p-4">
-        <!-- Alertas Flash -->
+        {% block content %}
+         <!-- Alertas Flash -->
         {% with messages = get_flashed_messages(with_categories=true) %} {% if
         messages %}
         <div
@@ -546,7 +547,7 @@
           </div>
           {% endfor %}
         </div>
-        {% endif %} {% endwith %} {% block content %}
+        {% endif %} {% endwith %}
         <!-- Aquí va el contenido principal -->
         {% endblock %}
       </main>

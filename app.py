@@ -3,6 +3,7 @@ import time
 from flask import Flask, render_template, request, redirect, url_for, flash, abort
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_wtf.csrf import CSRFProtect
+from sqlalchemy.exc import IntegrityError
 import requests
 from werkzeug.utils import secure_filename
 from flask_reuploads import UploadSet, configure_uploads, IMAGES
@@ -925,6 +926,9 @@ def eliminar_candidatura(candidatura_id):
         db.session.delete(candidatura)
         db.session.commit()
         flash("Candidatura eliminada exitosamente.", "success")
+    except IntegrityError:
+        db.session.rollback()
+        flash("No se puede eliminar la candidatura porque tiene votos asociados.", "danger")
     except Exception as e:
         db.session.rollback()
         flash(f"Ocurrió un error al eliminar la candidatura: {str(e)}", "danger")

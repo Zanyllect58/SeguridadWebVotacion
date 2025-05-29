@@ -1,12 +1,27 @@
 {% extends "dashboard.html" %}
+{% block title %}Editar Perfil{% endblock %}
+{% block styles %}
 
+<style>
+.bg-blue-translucent {
+    background-color: rgba(0, 51, 102, 0.8); /* Azul Bootstrap con 60% de opacidad */
+    backdrop-filter: blur(2px); /* Difumina el fondo si se quiere más efecto */
+}
+</style>
+{% endblock %}
 {% block content %}
-<div class="container mt-0 d-flex justify-content-center">
-    <div class="card shadow-sm col-lg-12">
-        <div class="card-header bg-primary text-white py-2">
-            <h5 class="mb-3"><i class="bi bi-person-circle"></i> Editar Perfil</h5>
+<div class="container mt-2 d-flex justify-content-center">
+    <div class="card w-75 mx-auto shadow-sm col-lg-12">
+        <div class="card-header bg-blue-translucent text-white py-2">
+            <h5 class="mb-1"><i class="bi bi-person-circle"></i> Editar Perfil</h5>
         </div>
         <div class="card-body p-3">
+
+            <!-- Mensaje campos obligatorios -->
+            <div class="alert alert-info py-2" role="alert">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                Por favor, complete todos los campos <strong>obligatorios <span class="text-danger">*</span></strong>.
+            </div>
 
             <!-- Mensajes flash -->
             {% with messages = get_flashed_messages(with_categories=true) %}
@@ -26,7 +41,9 @@
                 {{ form.hidden_tag() }}
 
                 <div class="mb-2">
-                    {{ form.nombres.label(class="form-label") }}
+                    <label for="{{ form.nombres.id }}" class="form-label">
+                        <i class="bi bi-person-fill"></i> Nombres: <span class="text-danger">*</span>
+                    </label>
                     {{ form.nombres(class="form-control form-control-sm", placeholder="Nombres") }}
                     {% for error in form.nombres.errors %}
                         <div class="text-danger small">{{ error }}</div>
@@ -34,7 +51,9 @@
                 </div>
 
                 <div class="mb-2">
-                    {{ form.apellidos.label(class="form-label") }}
+                    <label for="{{ form.apellidos.id }}" class="form-label">
+                        <i class="bi bi-person-fill"></i> Apellidos: <span class="text-danger">*</span>
+                    </label>
                     {{ form.apellidos(class="form-control form-control-sm", placeholder="Apellidos") }}
                     {% for error in form.apellidos.errors %}
                         <div class="text-danger small">{{ error }}</div>
@@ -43,21 +62,27 @@
 
                 <div class="row">
                     <div class="col-4 mb-2">
-                        {{ form.edad.label(class="form-label") }}
+                        <label for="{{ form.edad.id }}" class="form-label">
+                            <i class="bi bi-calendar-fill"></i> Edad: <span class="text-danger">*</span>
+                        </label>
                         {{ form.edad(class="form-control form-control-sm", placeholder="Edad") }}
                         {% for error in form.edad.errors %}
                             <div class="text-danger small">{{ error }}</div>
                         {% endfor %}
                     </div>
                     <div class="col-4 mb-2">
-                        {{ form.genero.label(class="form-label") }}
+                        <label for="{{ form.genero.id }}" class="form-label">
+                            <i class="bi bi-gender-ambiguous"></i> Género: <span class="text-danger">*</span>
+                        </label>
                         {{ form.genero(class="form-select form-select-sm") }}
                         {% for error in form.genero.errors %}
                             <div class="text-danger small">{{ error }}</div>
                         {% endfor %}
                     </div>
                     <div class="col-4 mb-2">
-                        {{ form.language_preference.label(class="form-label") }}
+                        <label for="{{ form.language_preference.id }}" class="form-label">
+                            <i class="bi bi-translate"></i> Preferencia de idioma: <span class="text-danger">*</span>
+                        </label>
                         {{ form.language_preference(class="form-select form-select-sm") }}
                         {% for error in form.language_preference.errors %}
                             <div class="text-danger small">{{ error }}</div>
@@ -66,7 +91,9 @@
                 </div>
 
                 <div class="mb-2">
-                    {{ form.bio.label(class="form-label") }}
+                    <label for="{{ form.bio.id }}" class="form-label">
+                        <i class="bi bi-journal-text"></i> Biografía:
+                    </label>
                     {{ form.bio(class="form-control form-control-sm", rows="2", placeholder="Biografía") }}
                     {% for error in form.bio.errors %}
                         <div class="text-danger small">{{ error }}</div>
@@ -76,7 +103,9 @@
                 <!-- Imagen actual y campo nuevo uno al lado del otro -->
                 <div class="row mb-2 align-items-center">
                     <div class="col-md-6 text-center">
-                        <label class="form-label">Imagen de perfil actual</label><br>
+                        <label class="form-label">
+                            <i class="bi bi-image"></i> Imagen de perfil actual:
+                        </label><br>
                         <img id="preview-img"
                              src="{{ url_for('uploaded_file', filename=current_user.profile.profile_picture if current_user.profile.profile_picture else 'default.jpg') }}"
                              alt="Imagen de perfil"
@@ -85,7 +114,9 @@
                     </div>
 
                     <div class="col-md-6">
-                        {{ form.profile_picture.label(class="form-label") }}
+                        <label for="{{ form.profile_picture.id }}" class="form-label">
+                            <i class="bi bi-upload"></i> Subir nueva imagen
+                        </label>
                         {{ form.profile_picture(class="form-control form-control-sm", id="profile-picture-input") }}
                         {% for error in form.profile_picture.errors %}
                             <div class="text-danger small">{{ error }}</div>
@@ -95,24 +126,27 @@
 
                 <div class="form-check mb-2">
                     {{ form.notifications_enabled(class="form-check-input", id="notifications_enabled") }}
-                    <label class="form-check-label small" for="notifications_enabled">Recibir notificaciones</label>
+                    <label class="form-check-label small" for="notifications_enabled">
+                        <i class="bi bi-bell-fill"></i> Recibir notificaciones
+                    </label>
                 </div>
 
                 <!-- Botones adicionales -->
                 <div class="d-flex justify-content-start mb-3">
                     <button
                         type="button"
-                        class="btn btn-info text-white btn-sm mx-1"
+                        class="btn btn-outline-warning btn-sm mx-1"
                         onclick="window.location.href='{{ url_for('edit_identificacion') }}'">
                         <i class="bi bi-credit-card-2-front"></i> Cambiar Identificación
                     </button>
                     <button
                         type="button"
-                        class="btn btn-info text-white btn-sm mx-1"
+                        class="btn btn-outline-info btn-sm mx-1"
                         onclick="window.location.href='{{ url_for('change_password') }}'">
                         <i class="bi bi-key"></i> Cambiar Contraseña
                     </button>
                 </div>
+
 
                 <div class="d-flex justify-content-between">
                     <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary btn-sm">
