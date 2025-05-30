@@ -112,6 +112,8 @@
 
       main {
         flex-grow: 1;
+        padding: 0.8rem;
+        
       }
 
       .profile-picture {
@@ -141,6 +143,35 @@
           transform: translateX(0); /* Muestra el sidebar */
         }
       }
+
+      .background-image {
+        position: absolute;
+        padding: 0;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        background-image: url("{{ url_for('static', filename='images/fondo.jpg') }}");
+        background-size: cover;
+        background-position: center;
+        z-index: 0;
+        background-repeat: no-repeat;
+        border: none;
+        outline: none;
+      }
+
+      .overlay-card {
+        position: relative;
+        z-index: 1;
+        background-color: rgba(255, 255, 255, 0.7); /* Fondo blanco semi-transparente */
+        max-width: 700px;
+        border-radius: 1rem;
+      }
+
+      .no-padding {
+        padding: 0 !important;
+      }
+      
     </style>
 
     {% block styles %}{% endblock %}
@@ -167,7 +198,7 @@
             class="rounded-circle navbar-profile-img shadow-sm border border-light"
           />
           <div class="ms-3 text-white">
-            <div class="fw-semibold">{{ current_user.username }}</div>
+            <div class="fw-semibold">{{ current_user.username or current_user.profile.name }}</div>
             <div class="small text-capitalize text-light-emphasis">
               {{ current_user.role.value }}
             </div>
@@ -522,7 +553,8 @@
         </div>
       </nav>
 
-      <main class=" flex-grow-1 p-4">
+      <main>
+      
         {% block content %}
          <!-- Alertas Flash -->
         {% with messages = get_flashed_messages(with_categories=true) %} {% if
@@ -549,6 +581,19 @@
         </div>
         {% endif %} {% endwith %}
         <!-- Aquí va el contenido principal -->
+        <div class="p-4 position-relative w-100 background-image">
+        <div class="background-image"></div>
+          <div class="card overlay-card text-center mx-auto shadow-lg mt-5 p-4">
+            <h2 class="fw-bold">Sistema de Votaciones</h2>
+            <p class="mb-0">Universidad Santo Tomás</p>
+            <hr />
+            <p>
+              Bienvenido, {{ current_user.username or current_user.profile.name }}.
+              <br />
+              Puedes gestionar tus elecciones o visualizar resultados según tu rol: <strong>{{ current_user.role.value|capitalize }}</strong>.
+            </p>
+          
+        </div>
         {% endblock %}
       </main>
     </div>
