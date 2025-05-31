@@ -580,42 +580,39 @@ def edit_profile():
 @app.route('/admin/editar_usuario/<int:user_id>', methods=['GET', 'POST'])
 @login_required
 def editar_usuario_admin(user_id):
-    print("Método de la petición:", request.method)
     if current_user.role not in [UserRole.ADMIN, UserRole.ADMINISTRATIVO]:
         flash("Acceso denegado.", "danger")
         return redirect(url_for('dashboard'))
-    
+
     user = User.query.get_or_404(user_id)
     form = EditUserForm(obj=user)
-    
+
     if request.method == 'GET':
-       form.role.data = user.role.value
+        form.role.data = user.role.value  # Prellenar el rol
 
     if form.validate_on_submit():
         user.identificacion = form.identificacion.data
         user.username = form.username.data
         user.email = form.email.data
-        
-        # Solo el admin logueado puede cambiar rol
+
         if current_user.role == UserRole.ADMIN:
             user.role = UserRole(form.role.data)
         else:
-            user.role = user.role    
-       
+            user.role = user.role
 
         try:
             db.session.commit()
             flash('Usuario actualizado correctamente.', 'success')
             if current_user.role == UserRole.ADMIN:
-                return redirect(url_for('listar_usuarios'))  
+                return redirect(url_for('listar_usuarios'))
             else:
                 return redirect(url_for('listar_votantes'))
         except Exception as e:
             db.session.rollback()
-            flash('Error al actualizar el usuario.', 'danger')
-            print(f"Error: {e}")
-    
-    return render_template('editar_usuario_admin.html', form=form, user=user)
+            flash(f'Error al actualizar el usuario: {e}', 'danger')
+
+    return render_template('editar_usuario_admin.html', form=form, user=user, user_role=current_user.role.value)
+
 
 
 @app.route('/eleccion/<int:eleccion_id>/editar', methods=['GET', 'POST'])
@@ -660,17 +657,22 @@ def editar_eleccion(eleccion_id):
 
     return render_template('editar_eleccion.html', form=form, eleccion=eleccion)
 
-@app.route('/edit_identificacion', methods=['GET', 'POST']) # Ruta para que el admin edite su propia identificación
+@app.route('/edit_identificacion', methods=['GET', 'POST'])
 @login_required
 def edit_identificacion():
     form = EditIdentificacionForm()
 
     if form.validate_on_submit():
-        nueva_identificacion = form.nueva_identificacion.data
+        nueva_identificacion = form.nueva_identificacion.data.strip()
 
-        existing_user = User.query.filter_by(identificacion=nueva_identificacion, role=current_user.role).first()
+        # Verifica si ya existe un usuario con esa identificación y mismo rol
+        existing_user = User.query.filter_by(
+            identificacion=nueva_identificacion,
+            role=current_user.role
+        ).first()
+
         if existing_user:
-            flash('Ya existe un usuario con esa identificación en el mismo rol.', 'danger')
+            flash('❌ Ya existe un usuario con esa identificación en el mismo rol.', 'danger')
             return redirect(url_for('edit_identificacion'))
 
         try:
@@ -684,16 +686,20 @@ def edit_identificacion():
                 old_identificacion=old_identificacion,
                 new_identificacion=nueva_identificacion
             )
-            db.session.add(log)
 
+            db.session.add(log)
             db.session.commit()
-            flash('Identificación actualizada exitosamente.', 'success')
+
+            flash('✅ Identificación actualizada exitosamente.', 'success')
             return redirect(url_for('edit_profile'))
+
         except Exception as e:
             db.session.rollback()
-            flash(f'Ocurrió un error al actualizar: {str(e)}', 'danger')
+            print(f"[Error] Falló la actualización: {e}")
+            flash(f'⚠️ Ocurrió un error al actualizar: {str(e)}', 'danger')
 
     return render_template('edit_identificacion.html', form=form)
+
 
 #Ruta para que el admin cambie su propia contraseña
 @app.route('/change_password', methods=['GET', 'POST'])
@@ -760,15 +766,15 @@ def edit_identificacion_user(user_id):
                 new_identificacion=nueva_identificacion
             )
             db.session.add(log)
-
+            print(f"Antes de commit: log={log}")
             db.session.commit()
+            print("Commit exitoso")
             flash('Identificación del usuario actualizada exitosamente.', 'success')
             return redirect(url_for('manage_users'))
         except Exception as e:
             db.session.rollback()
+            print(f"Error al actualizar identificación y guardar log: {e}")
             flash(f'Ocurrió un error al actualizar: {str(e)}', 'danger')
-
-    return render_template('listar_usuarios.html', form=form, user=user)
 
 # Ruta para editar una candidatura
 @app.route('/candidatura/<int:candidatura_id>/editar', methods=['GET', 'POST'])
@@ -941,12 +947,28 @@ def eliminar_candidatura(candidatura_id):
 #------------------------------------------
 
 
-
 @app.route('/logs_identificaciones')
-@login_required
 def logs_identificaciones():
     logs = IdentificationChangeLog.query.order_by(IdentificationChangeLog.timestamp.desc()).all()
     return render_template('logs_identificaciones.html', logs=logs)
+
+
+@app.route('/test_create_log')
+@login_required
+def test_create_log():
+    try:
+        log = IdentificationChangeLog(
+            changed_by_user_id=current_user.id,
+            affected_user_id=current_user.id,
+            old_identificacion='OLD123',
+            new_identificacion='NEW123'
+        )
+        db.session.add(log)
+        db.session.commit()
+        return "Log creado correctamente"
+    except Exception as e:
+        db.session.rollback()
+        return f"Error al crear log: {str(e)}"
 
 #------------------------------------------
 

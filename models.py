@@ -82,6 +82,7 @@ class UserProfile(db.Model):
 from datetime import datetime
 
 class IdentificationChangeLog(db.Model):
+    __tablename__ = 'identification_change_log'
     id = db.Column(db.Integer, primary_key=True)
     changed_by_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     affected_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
