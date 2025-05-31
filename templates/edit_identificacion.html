@@ -14,7 +14,7 @@ block styles %}
 <div style="padding: 0.8rem">
   <div class="container mt-5 d-flex justify-content-center">
     <div class="card shadow-lg w-75 mx-auto">
-      <div class="card-header bg-blue-translucent text-white">
+      <div class="card-header bg-blue-translucent text-white text-center">
         <h2 class="mb-0">
           <i class="bi bi-card-text"></i> Cambiar Identificación
         </h2>
@@ -46,9 +46,8 @@ block styles %}
 
           <div class="mb-3">
             {{ form.nueva_identificacion.label(class="form-label") }} {{
-            form.nueva_identificacion(class="form-control", placeholder="Nueva
-            identificación") }} {% for error in form.nueva_identificacion.errors
-            %}
+            form.nueva_identificacion(class="form-control", placeholder="Nueva identificación") }}
+             {% for error in form.nueva_identificacion.errors%}
             <div class="text-danger small">{{ error }}</div>
             {% endfor %}
           </div>
