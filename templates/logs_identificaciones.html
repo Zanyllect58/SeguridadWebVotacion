@@ -3,26 +3,40 @@
 {% block title %}Logs de Cambios de Identificación{% endblock %}
 
 {% block styles %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 <style>
+    .card {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        border: 2px solid black;
+        border-radius: 8px;
+    }
+
+    .card h2 {
+        margin-bottom: 20px;
+    }
+
     table {
         width: 100%;
         border-collapse: collapse;
-        margin-bottom: 10px;
+        margin-top: 10px;
         background: white;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
+
     thead {
         background-color: #007bff;
         color: white;
     }
+
     th, td {
         padding: 12px 15px;
         border: 1px solid #ddd;
         text-align: left;
     }
+
     tbody tr:hover {
         background-color: #f1f1f1;
     }
+
     #noData {
         text-align: center;
         color: #999;
@@ -32,40 +46,48 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid p-0">
-    <h1 class="mb-4">Logs de Cambios de Identificación</h1>
+<div class="container mt-2">
+  <div class="card w-100 mx-auto">
+    <div class="card-body">
+      <h2 class="mb-4"><i class="bi bi-clock-history me-2"></i>Logs de Cambios de Identificación</h2>
 
-    {% if logs %}
-    <table class="table table-striped table-bordered">
+      {% if logs %}
+      <table class="table table-striped table-bordered">
         <thead>
-            <tr>
-                <th>Fecha y Hora</th>
-                <th>Usuario que Cambió</th>
-                <th>Usuario Afectado</th>
-                <th>Identificación Antigua</th>
-                <th>Identificación Nueva</th>
-            </tr>
+          <tr>
+            <th>Fecha y Hora</th>
+            <th>Usuario que Cambió</th>
+            <th>Usuario Afectado</th>
+            <th>Identificación Antigua</th>
+            <th>Identificación Nueva</th>
+          </tr>
         </thead>
         <tbody>
-            {% for log in logs %}
-            <tr>
-                <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                <td>{{ log.changed_by.username }}</td>
-                <td>{{ log.affected_user.username }}</td>
-                <td>{{ log.old_identificacion }}</td>
-                <td>{{ log.new_identificacion }}</td>
-            </tr>
-            {% endfor %}
+          {% for log in logs %}
+          <tr>
+            <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+            <td>{{ log.changed_by.username }}</td>
+            <td>{{ log.affected_user.username }}</td>
+            <td>{{ log.old_identificacion }}</td>
+            <td>{{ log.new_identificacion }}</td>
+          </tr>
+          {% endfor %}
         </tbody>
-    </table>
-    {% else %}
-    <div id="noData">No hay registros de cambios de identificación.</div>
-    {% endif %}
+      </table>
+      {% else %}
+      <div id="noData">No hay registros de cambios de identificación.</div>
+      {% endif %}
+
+      <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary mt-3">
+        <i class="bi bi-arrow-left"></i> Volver
+      </a>
+    </div>
+  </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-    // Por ahora sin scripts, pero puedes añadir filtrado o paginación si quieres.
+  // Aquí puedes añadir lógica si quieres interactividad
 </script>
 {% endblock %}
