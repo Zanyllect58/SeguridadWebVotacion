@@ -1,67 +1,88 @@
 {% extends "dashboard.html" %}
 
+{% block title %}Editar Usuario{% endblock %}
+
+{% block styles %}
+<style>
+  .bg-blue-translucent {
+    background-color: rgba(0,51,102,0.8);
+    backdrop-filter: blur(2px);
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container mt-5">
-    <div class="card shadow-lg">
-        <div class="card-header bg-primary text-white">
-            <h2 class="mb-0"><i class="bi bi-pencil-square"></i> Editar Usuario</h2>
-        </div>
-        <div class="card-body">
-            <form method="POST" novalidate>
-                {{ form.hidden_tag() }}
+<div style="padding: 0.8rem">
+  <div class="container mt-2">
+    <div class="card w-75 mx-auto shadow-lg">
+      <div class="card-header bg-blue-translucent text-white">
+        <h2 class="mb-0"><i class="bi bi-pencil-square"></i> Editar Usuario</h2>
+      </div>
+      <div class="card-body">
+        <form method="POST" novalidate>
+          {{ form.hidden_tag() }}
 
-                <div class="mb-3">
-                    {{ form.identificacion.label(class="form-label") }}
-                    {{ form.identificacion(class="form-control", placeholder="Número de identificación") }}
-                    {% for error in form.identificacion.errors %}
-                        <div class="text-danger small">{{ error }}</div>
-                    {% endfor %}
-                </div>
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.identificacion.id }}">
+              <i class="bi bi-card-text"></i> {{ form.identificacion.label.text }}
+            </label>
+            {{ form.identificacion(class="form-control", placeholder="Número de identificación") }}
+            {% for error in form.identificacion.errors %}
+              <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+          </div>
 
-                <div class="mb-3">
-                    {{ form.username.label(class="form-label") }}
-                    {{ form.username(class="form-control", placeholder="Usuario") }}
-                    {% for error in form.username.errors %}
-                        <div class="text-danger small">{{ error }}</div>
-                    {% endfor %}
-                </div>
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.username.id }}">
+              <i class="bi bi-person"></i> {{ form.username.label.text }}
+            </label>
+            {{ form.username(class="form-control", placeholder="Usuario") }}
+            {% for error in form.username.errors %}
+              <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+          </div>
 
-                <div class="mb-3">
-                    {{ form.email.label(class="form-label") }}
-                    {{ form.email(class="form-control", placeholder="Correo electrónico") }}
-                    {% for error in form.email.errors %}
-                        <div class="text-danger small">{{ error }}</div>
-                    {% endfor %}
-                </div>
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.email.id }}">
+              <i class="bi bi-envelope"></i> {{ form.email.label.text }}
+            </label>
+            {{ form.email(class="form-control", placeholder="Correo electrónico") }}
+            {% for error in form.email.errors %}
+              <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+          </div>
 
-                {% if current_user.role.value == 'admin' %}
-                    <div class="mb-3">
-                        {{ form.role.label(class="form-label") }}
-                        {{ form.role(class="form-select") }}
-                        {% for error in form.role.errors %}
-                            <div class="text-danger small">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <input type="hidden" name="role" value="{{ form.role.data }}">
-                {% endif %}
-                <div class="d-flex justify-content-between">
-                    {% if user_role == 'admin' %}
-                    <a href="{{ url_for('listar_usuarios') }}" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left"></i> Volver
-                    </a>
-                    {% elif user_role == 'administrativo' %}
-                    <a href="{{ url_for('listar_votantes') }}" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left"></i> Volver
-                    </a>
-                    {% endif %}
-                    <button type="submit" class="btn btn-success">
-                    {{ form.submit.label }}
-                    </button>
-                </div>
+          {% if current_user.role.value == 'admin' %}
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.role.id }}">
+              <i class="bi bi-shield-lock"></i> {{ form.role.label.text }}
+            </label>
+            {{ form.role(class="form-select") }}
+            {% for error in form.role.errors %}
+              <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <input type="hidden" name="role" value="{{ form.role.data }}" />
+          {% endif %}
 
-            </form>
-        </div>
+          <div class="d-flex justify-content-between">
+            {% if user_role == 'admin' %}
+            <a href="{{ url_for('listar_usuarios') }}" class="btn btn-outline-secondary">
+              <i class="bi bi-arrow-left"></i> Volver
+            </a>
+            {% elif user_role == 'administrativo' %}
+            <a href="{{ url_for('listar_votantes') }}" class="btn btn-outline-secondary">
+              <i class="bi bi-arrow-left"></i> Volver
+            </a>
+            {% endif %}
+            <button type="submit" class="btn btn-success">
+              <i class="bi bi-save"></i> {{ form.submit.label.text }}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
+  </div>
 </div>
 {% endblock %}

@@ -10,74 +10,75 @@
 </style>
 {% endblock %}
 {% block content %}
-<div class="container-fluid mt-4">
-    <div class="w-75 mx-auto">
-        <div class="card shadow mb-4">
-            <div class="card-header bg-blue-translucent text-white text-center">
-                <h4 class="mb-0"><i class="bi bi-check2-square me-2 "></i>Mis Votaciones Registradas</h4>
-            </div>
-            <div class="card-body">
-                {% if votos %}
-                    {% for voto in votos %}
-                        <div class="card mb-3">
-                            <div class="card-body d-flex justify-content-between align-items-center">
-                                <div>
-                                
-                                    <p class="mb-1">
-                                        <i class="bi bi-pin-map-fill me-1 text-primary"></i>
-                                        <strong>Elección:</strong> {{ voto.eleccion.nombre }}
-                                    </p>
-                                    
-                                    <p class="mb-1">
-                                        <i class="bi bi-person-check-fill me-1 text-success"></i>
-                                        
-                                        <strong>Voto por:</strong> {{ voto.candidatura.user.profile.nombres or voto.candidatura.user.username }}
-                                    </p>
+<div style="padding: 0.8rem;">
+    <div class="container-fluid mt-4">
+        <div class="w-75 mx-auto">
+            <div class="card shadow-lg mb-4">
+                <div class="card-header bg-blue-translucent text-white text-center">
+                    <h4 class="mb-0"><i class="bi bi-check2-square me-2 "></i>Mis Votaciones Registradas</h4>
+                </div>
+                <div class="card-body">
+                    {% if votos %}
+                        {% for voto in votos %}
+                            <div class="card mb-3">
+                                <div class="card-body d-flex justify-content-between align-items-center">
                                     <div>
-                                    {% if voto.candidatura.user.profile and voto.candidatura.user.profile.profile_picture %}
-                                        <img src="{{ url_for('uploaded_file', filename=voto.candidatura.user.profile.profile_picture) }}" 
-                                            alt="Foto del candidato" 
-                                            class="img-thumbnail rounded-circle"
-                                            style="width: 80px; height: 80px; object-fit: cover; cursor: pointer;"
-                                            onclick="showImageInModal(this.src)">
-                                    {% else %}
-                                        <img src="{{ url_for('uploaded_file', filename='default.jpg') }}" 
-                                            alt="Sin foto" 
-                                            class="img-thumbnail rounded-circle"
-                                            style="width: 80px; height: 80px; object-fit: cover; cursor: pointer;"
-                                            onclick="showImageInModal(this.src)">
-                                    {% endif %}
-                                </div>
-                                    <p class="mb-1">
-                                        <i class="bi bi-card-text me-1 text-info"></i>
-                                        <strong>Propuesta:</strong> {{ voto.candidatura.propuesta }}
-                                    </p>
-                                    <p class="text-muted mb-0">
-                                        <i class="bi bi-calendar-check me-1"></i>
-                                        <strong>Fecha:</strong> {{ voto.createdAt.strftime('%d/%m/%Y') }}
-                                    </p>
-                                </div>
-                                
+                                    
+                                        <p class="mb-1">
+                                            <i class="bi bi-pin-map-fill me-1 text-primary"></i>
+                                            <strong>Elección:</strong> {{ voto.eleccion.nombre }}
+                                        </p>
+                                        
+                                        <p class="mb-1">
+                                            <i class="bi bi-person-check-fill me-1 text-success"></i>
+                                            
+                                            <strong>Voto por:</strong> {{ voto.candidatura.user.profile.nombres or voto.candidatura.user.username }}
+                                        </p>
+                                        <div>
+                                        {% if voto.candidatura.user.profile and voto.candidatura.user.profile.profile_picture %}
+                                            <img src="{{ url_for('uploaded_file', filename=voto.candidatura.user.profile.profile_picture) }}" 
+                                                alt="Foto del candidato" 
+                                                class="img-thumbnail rounded-circle"
+                                                style="width: 80px; height: 80px; object-fit: cover; cursor: pointer;"
+                                                onclick="showImageInModal(this.src)">
+                                        {% else %}
+                                            <img src="{{ url_for('uploaded_file', filename='default.jpg') }}" 
+                                                alt="Sin foto" 
+                                                class="img-thumbnail rounded-circle"
+                                                style="width: 80px; height: 80px; object-fit: cover; cursor: pointer;"
+                                                onclick="showImageInModal(this.src)">
+                                        {% endif %}
+                                    </div>
+                                        <p class="mb-1">
+                                            <i class="bi bi-card-text me-1 text-info"></i>
+                                            <strong>Propuesta:</strong> {{ voto.candidatura.propuesta }}
+                                        </p>
+                                        <p class="text-muted mb-0">
+                                            <i class="bi bi-calendar-check me-1"></i>
+                                            <strong>Fecha:</strong> {{ voto.createdAt.strftime('%d/%m/%Y') }}
+                                        </p>
+                                    </div>
+                                    
 
+                                </div>
                             </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="alert alert-info text-center" role="alert">
+                            <i class="bi bi-info-circle-fill me-1"></i> Aún no has registrado votaciones.
                         </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="alert alert-info text-center" role="alert">
-                        <i class="bi bi-info-circle-fill me-1"></i> Aún no has registrado votaciones.
-                    </div>
-                {% endif %}
+                    {% endif %}
 
-                <div class="text-end mt-4">
-                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left-circle me-1"></i> Volver al Dashboard
-                    </a>
+                    <div class="text-end mt-4">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left-circle me-1"></i> Volver al Dashboard
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
 <!-- Modal para mostrar foto -->
 <div class="modal fade" id="profileImageModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">

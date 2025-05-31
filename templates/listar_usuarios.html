@@ -3,381 +3,305 @@
 {% block title %}Lista de Usuarios{% endblock %}
 
 {% block styles %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 <style>
-    input[type="text"] {
-        padding: 10px;
-        margin-bottom: 15px;
-        width: 100%;
-        border-radius: 5px;
-        border: 1px solid #ddd;
+    .container {
+        display: flex;
+        gap: 2%;
+        flex-wrap: wrap;
     }
+
+    .label {
+        font-weight: bold;
+    }
+
+    .card h2 {
+        margin-bottom: 20px;
+    }
+
+    .search-buttons {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .search-buttons .btn {
+        padding: 6px 10px;
+        font-size: 0.85rem;
+        white-space: nowrap;
+    }
+
+    .edit-btn,
+    .delete-btn,
+    .edit-password-btn {
+        padding: 6px 10px;
+        font-size: 0.85rem;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .edit-btn {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .edit-btn:hover {
+        background-color: #218838;
+    }
+
+    .delete-btn {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .delete-btn:hover {
+        background-color: #c82333;
+    }
+
+    .edit-password-btn {
+        background-color: #ffc107;
+        color: black;
+    }
+
+    .edit-password-btn:hover {
+        background-color: #e0a800;
+    }
+
     table {
         width: 100%;
         border-collapse: collapse;
         margin-bottom: 10px;
     }
+
     thead {
         background-color: #007bff;
         color: white;
     }
+
     th, td {
         padding: 12px 15px;
         border: 1px solid #ddd;
         text-align: left;
     }
+
     tbody tr:hover {
         background-color: #f1f1f1;
         cursor: pointer;
     }
+
     th.sortable:hover {
         cursor: pointer;
         background-color: #0056b3;
     }
-    button {
-        background-color: #007bff;
-        color: white;
-        border: none;
-        padding: 7px 12px;
-        border-radius: 4px;
-        cursor: pointer;
-        margin-right: 5px;
-    }
-    button:hover {
-        background-color: #0056b3;
-    }
+
     #noData {
         text-align: center;
         color: #999;
         margin-top: 15px;
     }
-    /* Modal Styles */
-    .modal {
-        display: none; 
-        position: fixed; 
-        z-index: 100; 
-        left: 0; top: 0;
-        width: 100%; height: 100%; 
-        overflow: auto; 
-        background-color: rgba(0,0,0,0.4);
-    }
-    .modal-content {
-        background-color: #fefefe;
-        margin: 80px auto;
-        padding: 20px;
-        border-radius: 8px;
-        width: 90%;
-        max-width: 500px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    }
-    .modal-header, .modal-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    .modal-header h2 {
-        margin: 0;
-    }
-    .modal-footer button {
-        padding: 8px 14px;
-    }
-    .modal-footer .close-btn {
-        background-color: #dc3545;
-    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid p-0">
-    <h1 class="mb-4">Usuarios Registrados</h1>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+<div style="padding: 0.8rem;">
+  <div class="container mt-2">
+    <div class="card w-100 mx-auto shadow-lg ">
+      <div class="card-body">
+        <h2 class="mb-4"><i class="bi bi-people-fill me-2"></i>Usuarios Registrados</h2>
+        <meta name="csrf-token" content="{{ csrf_token() }}">
 
-     {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        <div id="flash-messages">
-            {% for category, message in messages %}
-           
-            {% endfor %}
-        </div>
-        {% endif %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div id="flash-messages">
+              {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
         {% endwith %}
-    
-    
 
-    
-
-        <form method="GET" class="row g-3 mb-4">
-            <div class="col-md-4">
-               <input type="text" id="searchInput" placeholder="Buscar por cualquier campo..." class="form-control mb-3" />
-            </div>
-            {% if user_role == 'admin' %}
-            <div class="col-md-3">
-                <select name="role" class="form-select">
-                    <option value="">-- Filtrar por rol --</option>
-                    <option value="administrativo" {% if role_filter == 'administrativo' %}selected{% endif %}>Administrativo</option>
-                    <option value="candidato" {% if role_filter == 'candidato' %}selected{% endif %}>Candidato</option>
-                    <option value="votante" {% if role_filter == 'votante' %}selected{% endif %}>Votante</option>
-                </select>
-            </div>
-            
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-primary w-100">Buscar</button>
-            </div>
-            
-            <div class="col-md-2">
-                <a href="{{ url_for('listar_usuarios') }}" class="btn btn-secondary w-100">Limpiar</a>
-            </div>
-            {% endif %}
+        <form method="GET" class="row g-3 mb-2">
+          <div class="col-md-4">
+            <input type="text" id="searchInput" placeholder="Buscar por cualquier campo..." class="form-control mb-3" />
+          </div>
+          {% if user_role == 'admin' %}
+          <div class="col-md-3">
+            <select name="role" class="form-select">
+              <option value="">-- Filtrar por rol --</option>
+              <option value="administrativo" {% if role_filter == 'administrativo' %}selected{% endif %}>Administrativo</option>
+              <option value="candidato" {% if role_filter == 'candidato' %}selected{% endif %}>Candidato</option>
+              <option value="votante" {% if role_filter == 'votante' %}selected{% endif %}>Votante</option>
+            </select>
+          </div>
+          <div class="col-md-3 d-flex flex-wrap align-items-start gap-2">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-search"></i> Buscar
+            </button>
+            <a href="{{ url_for('listar_usuarios') }}" class="btn btn-secondary">
+              <i class="bi bi-arrow-clockwise"></i> Limpiar
+            </a>
+          </div>
+          {% endif %}
         </form>
 
-    <table class="table table-striped table-bordered">
-        <thead>
+        <table class="table table-striped table-bordered">
+          <thead>
             <tr>
-                <th class="sortable" data-column="id">ID</th>
-                <th class="sortable" data-column="username">Usuario</th>
-                <th class="sortable" data-column="email">Email</th>
-                <th class="sortable" data-column="identificacion">Identificación</th>
-                <th class="sortable" data-column="role">Rol</th>
-                <th >Acciones</th>
+              <th class="sortable" data-column="id"><i class="bi bi-hash me-1"></i>ID</th>
+              <th class="sortable" data-column="username"><i class="bi bi-person me-1"></i>Usuario</th>
+              <th class="sortable" data-column="email"><i class="bi bi-envelope me-1"></i>Email</th>
+              <th class="sortable" data-column="identificacion"><i class="bi bi-card-text me-1"></i>Identificación</th>
+              <th class="sortable" data-column="role"><i class="bi bi-person-badge me-1"></i>Rol</th>
+              <th><i class="bi bi-gear me-1"></i>Acciones</th>
             </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-    </table>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
 
-    <div id="noData" style="display:none;">No hay datos disponibles</div>
-
-    <!-- Modal -->
-    <div id="formModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Editar Usuario</h2>
-                <button id="closeModalBtn" class="btn-close"></button>
-            </div>
-            <form id="userForm">
-                <input type="hidden" id="userId" />
-                <div class="mb-3">
-                    <label for="username" class="form-label">Usuario</label>
-                    <input type="text" id="username" class="form-control" required />
-                </div>
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" id="email" class="form-control" required />
-                </div>
-                <div class="mb-3">
-                    <label for="identificacion" class="form-label">Identificación</label>
-                    <input type="text" id="identificacion" class="form-control" />
-                </div>
-                <div class="mb-3">
-                    <label for="role" class="form-label">Rol</label>
-                    <select id="role" class="form-select" required>
-                        <option value="admin">Administrador</option>
-                        <option value="candidato">Candidato</option>
-                        <option value="administrativo">Administrativo</option>
-                        <option value="votante">Votante</option>
-                    </select>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" id="cancelBtn" class="btn btn-secondary"></button>
-                    <!--<button type="submit" class="btn btn-primary">Guardar</button> -->
-                </div>
-            </form>
-        </div>
+        <div id="noData" style="display:none;">No hay datos disponibles</div>
+      <a
+              href="{{ url_for('dashboard') }}"
+              class="btn btn-outline-secondary"
+            >
+              <i class="bi bi-arrow-left"></i> Volver
+            </a>
+      </div>
     </div>
+  </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
- 
-    const users = {{ usuarios | tojson }};
-    
-    console.log(users);  // Ahora funcionará correctamente sin errores de serialización
-    
-    const tableBody = document.getElementById('tableBody');
-    const searchInput = document.getElementById('searchInput');
-    const noData = document.getElementById('noData');
-    const modal = document.getElementById('formModal');
-    const closeModalBtn = document.getElementById('closeModalBtn');
-    const cancelBtn = document.getElementById('cancelBtn');
-    const userForm = document.getElementById('userForm');
+const users = {{ usuarios | tojson }};
+const user_role = "{{ user_role }}";
+const tableBody = document.getElementById('tableBody');
+const searchInput = document.getElementById('searchInput');
+const noData = document.getElementById('noData');
+let filteredUsers = [...users];
+let currentSortColumn = null;
+let currentSortOrder = 'asc';
 
-    let currentSortColumn = null;
-    let currentSortOrder = 'asc';
-    let filteredUsers = [...users];
+function renderTable(data) {
+    tableBody.innerHTML = '';
+    if (data.length === 0) {
+        noData.style.display = 'block';
+        return;
+    }
+    noData.style.display = 'none';
 
-    function renderTable(data) {
-        tableBody.innerHTML = '';
-        if (data.length === 0) {
-            noData.style.display = 'block';
-            return;
-        }
-        noData.style.display = 'none';
+    data.forEach(user => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${user.id}</td>
+            <td>${user.username}</td>
+            <td>${user.email}</td>
+            <td>${user.identificacion}</td>
+            <td>${user.role}</td>
+            <td class="text-center d-flex justify-content-center gap-2">
+                <button class="edit-btn" data-id="${user.id}" title="Editar usuario">
+                    <i class="bi bi-pencil-square"></i>
+                </button>
+                ${user_role === 'admin' ? `
+                <button class="edit-password-btn" data-id="${user.id}" title="Editar contraseña">
+                    <i class="bi bi-key-fill"></i>
+                </button>` : ''}
+                <button class="delete-btn" data-id="${user.id}" title="Eliminar usuario">
+                    <i class="bi bi-trash-fill"></i>
+                </button>
+            </td>
+        `;
+        tableBody.appendChild(tr);
+    });
 
-        data.forEach(user => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${user.id}</td>
-                <td>${user.username}</td>
-                <td>${user.email}</td>
-                <td>${user.identificacion}</td>
-                <td>${user.role}</td>
-                <td class="text-center d-flex justify-content-center gap-2">
-                    <button class="edit-btn btn btn-sm btn-primary" data-id="${user.id}">
-                        <i class="bi bi-pencil-square me-1"></i> Editar
-                    </button>
-                    <button class="edit-password-btn btn btn-sm btn-warning" data-id="${user.id}">
-                        <i class="bi bi-key-fill me-1"></i> Contraseña
-                    </button>
-                    <button class="delete-btn btn btn-sm btn-danger" data-id="${user.id}">
-                        <i class="bi bi-trash-fill me-1"></i> Eliminar
-                    </button>   
-                </td>
-            `;
-            tableBody.appendChild(tr);
-        });
-
-            document.querySelectorAll('.edit-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const id = parseInt(e.target.dataset.id);
-
-                // Redirige al endpoint del backend Flask
-                window.location.href = `/admin/editar_usuario/${id}`;
-            });
-        });
-
-
-
-        document.querySelectorAll('.delete-btn').forEach(btn => {
+    document.querySelectorAll('.edit-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
-        const id = parseInt(e.target.dataset.id);
+            const id = parseInt(e.target.closest('button').dataset.id);
+            window.location.href = `/admin/editar_usuario/${id}`;
+        });
+    });
 
+    document.querySelectorAll('.edit-password-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const id = parseInt(e.target.closest('button').dataset.id);
+            window.location.href = `/edit_user_password/${id}`;
+        });
+    });
+
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const id = parseInt(e.target.closest('button').dataset.id);
             if (confirm("¿Estás seguro de que deseas eliminar este usuario?")) {
                 fetch(`/delete_user/${id}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRFToken': getCSRFToken() // Si usas CSRF protection
-                    },
+                        'X-CSRFToken': getCSRFToken(),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
                 })
                 .then(response => {
-                    if (response.redirected) {
-                        window.location.href = response.url;
-                    } else if (response.ok) {
-                        // Eliminar la fila del DOM
-                        const row = e.target.closest('tr');
-                        if (row) row.remove();
+                    if (response.ok) {
+                        e.target.closest('tr').remove();
                     } else {
-                        alert('No se pudo eliminar el usuario.');
+                        alert("No se pudo eliminar el usuario.");
                     }
                 })
                 .catch(error => {
-                    console.error('Error al eliminar el usuario:', error);
-                    alert('Ocurrió un error al intentar eliminar el usuario.');
+                    console.error(error);
+                    alert("Error al eliminar el usuario.");
                 });
             }
         });
     });
+}
 
-    document.querySelectorAll('.edit-password-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        const id = parseInt(e.target.dataset.id);
-        window.location.href = `/edit_user_password/${id}`;  // Aquí se usa el endpoint correcto
-      });
-   } );
-
-
-        
+function sortTable(column) {
+    if (currentSortColumn === column) {
+        currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentSortColumn = column;
+        currentSortOrder = 'asc';
     }
 
-    
+    filteredUsers.sort((a, b) => {
+        if (a[column] < b[column]) return currentSortOrder === 'asc' ? -1 : 1;
+        if (a[column] > b[column]) return currentSortOrder === 'asc' ? 1 : -1;
+        return 0;
+    });
 
+    renderTable(filteredUsers);
+}
 
-    function sortTable(column) {
-        if (currentSortColumn === column) {
-            currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
-        } else {
-            currentSortColumn = column;
-            currentSortOrder = 'asc';
-        }
-
-        filteredUsers.sort((a, b) => {
-            if (a[column] < b[column]) return currentSortOrder === 'asc' ? -1 : 1;
-            if (a[column] > b[column]) return currentSortOrder === 'asc' ? 1 : -1;
-            return 0;
-        });
-
-        renderTable(filteredUsers);
-    }
-
-    function getCSRFToken() {
+function getCSRFToken() {
     return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    }
+}
 
+function filterTable(term) {
+    term = term.toLowerCase();
+    filteredUsers = users.filter(user =>
+        Object.values(user).some(value =>
+            String(value).toLowerCase().includes(term)
+        )
+    );
+    renderTable(filteredUsers);
+}
 
-    function filterTable(term) {
-        term = term.toLowerCase();
-        filteredUsers = users.filter(user => {
-            return Object.values(user).some(value =>
-                String(value).toLowerCase().includes(term)
-            );
-        });
-        renderTable(filteredUsers);
-    }
+searchInput.addEventListener('input', (e) => {
+    filterTable(e.target.value);
+});
 
-    function openModal(id) {
-        const user = users.find(u => u.id === id);
-        if (!user) return;
-
-        document.getElementById('userId').value = user.id;
-        document.getElementById('username').value = user.username;
-        document.getElementById('email').value = user.email;
-        document.getElementById('identificacion').value = user.identificacion;
-        document.getElementById('role').value = user.role;
-
-        modal.style.display = 'block';
-    }
-
-    function closeModal() {
-        modal.style.display = 'none';
-        userForm.reset();
-    }
-
-    searchInput.addEventListener('input', (e) => {
-        filterTable(e.target.value);
+document.querySelectorAll('th.sortable').forEach(th => {
+    th.addEventListener('click', () => {
+        sortTable(th.dataset.column);
     });
+});
 
-    document.querySelectorAll('th.sortable').forEach(th => {
-        th.addEventListener('click', () => {
-            sortTable(th.dataset.column);
-        });
-    });
-
-    closeModalBtn.addEventListener('click', closeModal);
-    cancelBtn.addEventListener('click', closeModal);
-
-    userForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const id = parseInt(document.getElementById('userId').value);
-        const index = users.findIndex(u => u.id === id);
-        if (index !== -1) {
-            users[index].username = document.getElementById('username').value;
-            users[index].email = document.getElementById('email').value;
-            users[index].identificacion = document.getElementById('identificacion').value;
-            users[index].role = document.getElementById('role').value;
-            filterTable(searchInput.value);
-            closeModal();
-            alert('Usuario actualizado correctamente.');
-        }
-    });
-
-    // Inicializa tabla
-    renderTable(users);
-
-    window.onclick = function(event) {
-        if (event.target === modal) {
-            closeModal();
-        }
-    };
-
+renderTable(filteredUsers);
 </script>
 {% endblock %}

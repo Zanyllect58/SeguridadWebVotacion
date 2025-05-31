@@ -1,86 +1,95 @@
 {% extends "dashboard.html" %}
 
-{% block title %}Crear Elección{% endblock %}
-{% block styles %}
+{% block title %}Crear Elección{% endblock %} {%
+block styles %}
 
 <style>
-.bg-blue-translucent {
-    background-color: rgba(0, 51, 102, 0.8); /* Azul Bootstrap con 60% de opacidad */
+  .bg-blue-translucent {
+    background-color: rgba(0,51,102,0.8); /* Azul Bootstrap con 80% de opacidad */
     backdrop-filter: blur(2px); /* Difumina el fondo si se quiere más efecto */
-}
+  }
 </style>
 
-{% endblock %}
-{% block content %}
-<div class="container mt-2">
+{% endblock %} {% block content %}
+<div style="padding: 0.8rem">
+  <div class="container mt-2">
     <div class="card w-75 mx-auto shadow-lg">
-        <div class="card-header bg-blue-translucent text-white">
-            <h2 class="mb-0"><i class="bi bi-plus-circle"></i> Nueva Elección</h2>
-        </div>
-        <div class="card-body">
-            <form method="POST" novalidate>
-                {{ form.hidden_tag() }}
+      <div class="card-header bg-blue-translucent text-white">
+        <h2 class="mb-0"><i class="bi bi-plus-circle"></i> Nueva Elección</h2>
+      </div>
+      <div class="card-body">
+        <form method="POST" novalidate>
+          {{ form.hidden_tag() }}
 
-                <div class="mb-3">
-                    <label class="form-label" for="{{ form.nombre.id }}">
-                        <i class="bi bi-pencil-square"></i> {{ form.nombre.label.text }}
-                    </label>
-                    {{ form.nombre(class="form-control", placeholder="Ej: Elección General 2025") }}
-                    {% for error in form.nombre.errors %}
-                        <div class="text-danger small">{{ error }}</div>
-                    {% endfor %}
-                </div>
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.nombre.id }}">
+              <i class="bi bi-pencil-square"></i> {{ form.nombre.label.text }}
+            </label>
+            {{ form.nombre(class="form-control", placeholder="  Elección General 2025") }} 
+            {% for error in form.nombre.errors %}
+            <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+          </div>
 
-                <div class="mb-3">
-                    <label class="form-label" for="{{ form.descripcion.id }}">
-                        <i class="bi bi-card-text"></i> {{ form.descripcion.label.text }}
-                    </label>
-                    {{ form.descripcion(class="form-control", placeholder="Descripción detallada de la elección") }}
-                    {% for error in form.descripcion.errors %}
-                        <div class="text-danger small">{{ error }}</div>
-                    {% endfor %}
-                </div>
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.descripcion.id }}">
+              <i class="bi bi-card-text"></i> {{ form.descripcion.label.text }}
+            </label>
+            {{ form.descripcion(class="form-control", placeholder="Descripción detallada de la elección") }} 
+            {% for error in
+            form.descripcion.errors %}
+            <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+          </div>
 
-                <div class="mb-3">
-                    <label class="form-label" for="{{ form.tipo_representacion.id }}">
-                        <i class="bi bi-list-ul"></i> {{ form.tipo_representacion.label.text }}
-                    </label>
-                    {{ form.tipo_representacion(class="form-select") }}
-                    {% for error in form.tipo_representacion.errors %}
-                        <div class="text-danger small">{{ error }}</div>
-                    {% endfor %}
-                </div>
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.tipo_representacion.id }}">
+              <i class="bi bi-list-ul"></i> {{
+              form.tipo_representacion.label.text }}
+            </label>
+            {{ form.tipo_representacion(class="form-select") }} {% for error in
+            form.tipo_representacion.errors %}
+            <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+          </div>
 
-                <div class="mb-3">
-                    <label class="form-label" for="{{ form.fecha_inicio.id }}">
-                        <i class="bi bi-calendar-event"></i> {{ form.fecha_inicio.label.text }}
-                    </label>
-                    {{ form.fecha_inicio(class="form-control") }}
-                    {% for error in form.fecha_inicio.errors %}
-                        <div class="text-danger small">{{ error }}</div>
-                    {% endfor %}
-                </div>
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.fecha_inicio.id }}">
+              <i class="bi bi-calendar-event"></i> {{
+              form.fecha_inicio.label.text }}
+            </label>
+            {{ form.fecha_inicio(class="form-control") }} {% for error in
+            form.fecha_inicio.errors %}
+            <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+          </div>
 
-                <div class="mb-3">
-                    <label class="form-label" for="{{ form.fecha_fin.id }}">
-                        <i class="bi bi-calendar-check"></i> {{ form.fecha_fin.label.text }}
-                    </label>
-                    {{ form.fecha_fin(class="form-control") }}
-                    {% for error in form.fecha_fin.errors %}
-                        <div class="text-danger small">{{ error }}</div>
-                    {% endfor %}
-                </div>
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.fecha_fin.id }}">
+              <i class="bi bi-calendar-check"></i> {{ form.fecha_fin.label.text
+              }}
+            </label>
+            {{ form.fecha_fin(class="form-control") }} {% for error in
+            form.fecha_fin.errors %}
+            <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+          </div>
 
-                <div class="d-flex justify-content-between">
-                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left"></i> Volver
-                    </a>
-                    <button type="submit" class="btn btn-success">
-                        <i class="bi bi-save"></i> {{ form.submit.label.text or 'Guardar' }}
-                    </button>
-                </div>
-            </form>
-        </div>
+          <div class="d-flex justify-content-between">
+            <a
+              href="{{ url_for('dashboard') }}"
+              class="btn btn-outline-secondary"
+            >
+              <i class="bi bi-arrow-left"></i> Volver
+            </a>
+            <button type="submit" class="btn btn-success">
+              <i class="bi bi-save"></i> {{ form.submit.label.text or 'Guardar'
+              }}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
+  </div>
 </div>
 {% endblock %}

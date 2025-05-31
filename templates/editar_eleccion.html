@@ -12,69 +12,71 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-2">
-    <div class="card shadow w-75 mx-auto">
-        <div class="card-header bg-blue-translucent text-white text-center">
-            <h4 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Editar Elección</h4>
-        </div>
-        <div class="card-body">
-            <form method="POST" novalidate>
-                {{ form.hidden_tag() }}
+<div style="padding: 0.8rem;">
+    <div class="container-fluid mt-2">
+        <div class="card shadow w-75 mx-auto">
+            <div class="card-header bg-blue-translucent text-white text-center">
+                <h4 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Editar Elección</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" novalidate>
+                    {{ form.hidden_tag() }}
 
-                <div class="mb-3">
-                    <label class="form-label" for="nombre">
-                        <i class="bi bi-pin-map-fill me-1"></i> {{ form.nombre.label.text }}
-                    </label>
-                    {{ form.nombre(class="form-control", placeholder="Ingrese el nombre de la elección") }}
-                    {% for error in form.nombre.errors %}
-                        <div class="form-text text-danger">{{ error }}</div>
-                    {% endfor %}
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label" for="descripcion">
-                        <i class="bi bi-card-text me-1"></i> {{ form.descripcion.label.text }}
-                    </label>
-                    {{ form.descripcion(class="form-control", rows=3, placeholder="Ingrese una descripción breve") }}
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label" for="tipo_representacion">
-                        <i class="bi bi-bank me-1"></i> {{ form.tipo_representacion.label.text }}
-                    </label>
-                    {{ form.tipo_representacion(class="form-select") }}
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label" for="fecha_inicio">
-                            <i class="bi bi-calendar-event me-1"></i> {{ form.fecha_inicio.label.text }}
+                    <div class="mb-3">
+                        <label class="form-label" for="nombre">
+                            <i class="bi bi-pin-map-fill me-1"></i> {{ form.nombre.label.text }}
                         </label>
-                        {{ form.fecha_inicio(class="form-control", placeholder="DD/MM/AAAA") }}
-                        {% for error in form.fecha_inicio.errors %}
+                        {{ form.nombre(class="form-control", placeholder="Ingrese el nombre de la elección") }}
+                        {% for error in form.nombre.errors %}
                             <div class="form-text text-danger">{{ error }}</div>
                         {% endfor %}
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label" for="fecha_fin">
-                            <i class="bi bi-calendar-check me-1"></i> {{ form.fecha_fin.label.text }}
-                        </label>
-                        {{ form.fecha_fin(class="form-control", placeholder="DD/MM/AAAA") }}
-                        {% for error in form.fecha_fin.errors %}
-                            <div class="form-text text-danger">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                </div>
 
-                <div class="d-flex justify-content-between mt-4">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-save me-1"></i> {{ form.submit.label.text if form.submit.label.text else "Guardar cambios" }}
-                    </button>
-                    <a href="{{ url_for('lista_elecciones') }}" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left-circle me-1"></i> Volver a Lista
-                    </a>
-                </div>
-            </form>
+                    <div class="mb-3">
+                        <label class="form-label" for="descripcion">
+                            <i class="bi bi-card-text me-1"></i> {{ form.descripcion.label.text }}
+                        </label>
+                        {{ form.descripcion(class="form-control", rows=3, placeholder="Ingrese una descripción breve") }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="tipo_representacion">
+                            <i class="bi bi-bank me-1"></i> {{ form.tipo_representacion.label.text }}
+                        </label>
+                        {{ form.tipo_representacion(class="form-select") }}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" for="fecha_inicio">
+                                <i class="bi bi-calendar-event me-1"></i> {{ form.fecha_inicio.label.text }}
+                            </label>
+                            {{ form.fecha_inicio(class="form-control", placeholder="DD/MM/AAAA") }}
+                            {% for error in form.fecha_inicio.errors %}
+                                <div class="form-text text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" for="fecha_fin">
+                                <i class="bi bi-calendar-check me-1"></i> {{ form.fecha_fin.label.text }}
+                            </label>
+                            {{ form.fecha_fin(class="form-control", placeholder="DD/MM/AAAA") }}
+                            {% for error in form.fecha_fin.errors %}
+                                <div class="form-text text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-1"></i> {{ form.submit.label.text if form.submit.label.text else "Guardar cambios" }}
+                        </button>
+                        <a href="{{ url_for('lista_elecciones') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left-circle me-1"></i> Volver a Lista
+                        </a>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>

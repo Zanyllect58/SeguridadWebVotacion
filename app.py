@@ -224,7 +224,7 @@ def crear_eleccion():
         db.session.add(nueva_eleccion)
         db.session.commit()
         flash("Elección creada exitosamente.", "success")
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('lista_elecciones'))
 
     return render_template('crear_eleccion.html', form=form)
 
@@ -377,7 +377,9 @@ def ver_eleccion(eleccion_id):
 @app.route('/resultados_elecciones')
 @login_required
 def resultados_elecciones():
-    elecciones = Eleccion.query.all()
+    elecciones = Eleccion.query.filter(
+        Eleccion.estado.in_(['activa', 'finalizada'])
+    ).all()
     
     if current_user.role == UserRole.CANDIDATO:
         candidaturas = Candidatura.query.filter_by(userId=current_user.id).all()
