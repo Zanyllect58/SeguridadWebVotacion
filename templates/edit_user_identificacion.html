@@ -1,6 +1,6 @@
 {% extends "dashboard.html" %}
 
-{% block title %}Cambiar Identificación{% endblock %}
+{% block title %}Editar Identificación de Usuario{% endblock %}
 
 {% block styles %}
 <style>
@@ -17,7 +17,7 @@
     <div class="card shadow-lg w-75 mx-auto">
       <div class="card-header bg-blue-translucent text-white text-center">
         <h2 class="mb-0">
-          <i class="bi bi-card-text"></i> Cambiar Identificación
+          <i class="bi bi-person-badge"></i> Editar Identificación de {{ user.username }}
         </h2>
       </div>
       <div class="card-body">
@@ -40,7 +40,7 @@
           {{ form.hidden_tag() }}
 
           <div class="mb-3">
-            <i class="bi bi-person-plus"></i> 
+            <i class="bi bi-person-badge"></i> 
             {{ form.nueva_identificacion.label(class="form-label") }}
             {{ form.nueva_identificacion(class="form-control", placeholder="Nueva identificación") }}
             {% for error in form.nueva_identificacion.errors %}
@@ -49,11 +49,11 @@
           </div>
 
           <div class="d-flex justify-content-between">
-            <a href="{{ url_for('edit_profile') }}" class="btn btn-outline-secondary">
+            <a href="{{ url_for('listar_usuarios', user_id=user.id) }}" class="btn btn-outline-secondary">
               <i class="bi bi-arrow-left"></i> Cancelar
             </a>
-            <button type="submit" class="btn btn-success">
-              <i class="bi bi-save"></i> Guardar
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-save"></i> Guardar Cambios
             </button>
           </div>
         </form>

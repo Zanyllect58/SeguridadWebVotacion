@@ -15,12 +15,19 @@ from flask import send_from_directory
 
 from flask import send_file
 from io import BytesIO
+from openpyxl import Workbook
+
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import cm
+from reportlab.lib import colors
 
 import os
 
+
 from forms import CrearEleccionForm
 from models import Eleccion
-from sqlalchemy import desc
+from sqlalchemy import desc, func
 from datetime import datetime
 
 
@@ -377,19 +384,39 @@ def ver_eleccion(eleccion_id):
 @app.route('/resultados_elecciones')
 @login_required
 def resultados_elecciones():
-    elecciones = Eleccion.query.filter(
-        Eleccion.estado.in_(['activa', 'finalizada'])
-    ).all()
-    
     if current_user.role == UserRole.CANDIDATO:
         candidaturas = Candidatura.query.filter_by(userId=current_user.id).all()
-        # Extraer las elecciones asociadas a esas candidaturas
-        elecciones = [candidatura.eleccion for candidatura in candidaturas]
-
-        # Evitar duplicados si el usuario puede tener múltiples candidaturas en la misma elección
+        elecciones = [c.eleccion for c in candidaturas]
         elecciones = list(set(elecciones))
-    
-    return render_template('resultados_elecciones.html', elecciones=elecciones)  
+    else:
+        elecciones = Eleccion.query.filter(
+            Eleccion.estado.in_(['activa', 'finalizada'])
+        ).all()
+
+    for eleccion in elecciones:
+        resultados = (
+            db.session.query(
+                User.username.label("username"),
+                UserProfile.profile_picture.label("profile_picture"),
+                Candidatura.propuesta,
+                func.count(Voto.id).label("votos"),
+                User.id.label("user_id")
+            )
+            .join(Candidatura, Candidatura.id == Voto.candidaturaId)
+            .join(User, User.id == Candidatura.userId)
+            .outerjoin(UserProfile, User.identificacion == UserProfile.user_identificacion)
+            .filter(Candidatura.eleccionId == eleccion.id)
+            .group_by(User.id, Candidatura.propuesta, User.username, UserProfile.profile_picture)
+            .order_by(func.count(Voto.id).desc())
+            .all()
+        )
+
+        # Guardamos los resultados filtrados directamente en cada elección
+        eleccion.resultados_filtrados = [r for r in resultados if r.votos > 0]
+
+    return render_template('resultados_elecciones.html', elecciones=elecciones)
+
+
 
 @app.route('/resultados/<int:eleccion_id>')
 @login_required
@@ -400,21 +427,37 @@ def ver_resultado_eleccion(eleccion_id):
     candidaturas = Candidatura.query.filter_by(eleccionId=eleccion_id).all()
     
     resultados = []
+    total_votos = 0
+    max_votos = 0
+    votos_por_candidato = {}
+
     for c in candidaturas:
         perfil = c.user.profile
         nombres = perfil.nombres if perfil and perfil.nombres else c.user.username
         apellidos = perfil.apellidos if perfil and perfil.apellidos else ''
+        votos_candidato = len(c.votos)
+        total_votos += votos_candidato
+        nombre_completo = f"{nombres} {apellidos}".strip()
         resultados.append({
-            'candidato': f"{nombres} {apellidos}".strip(),
+            'candidato': nombre_completo,
             'username': c.user.username,
             'propuesta': c.propuesta,
-            'votos': len(c.votos)
+            'votos': votos_candidato
         })
+        votos_por_candidato[nombre_completo] = votos_candidato
+        if votos_candidato > max_votos:
+            max_votos = votos_candidato
 
     # Ordenar por número de votos descendente
     resultados.sort(key=lambda x: x['votos'], reverse=True)
 
-    return render_template('ver_resultado_eleccion.html', eleccion=eleccion, resultados=resultados)
+    # Empate: contar cuántos tienen el máximo número de votos
+    ganadores = [c for c in resultados if c['votos'] == max_votos]
+    hubo_empate = len(ganadores) > 1
+
+    return render_template('ver_resultado_eleccion.html',eleccion=eleccion, resultados=resultados,
+                           total_votos=total_votos,hubo_empate=hubo_empate)
+
 
 @app.route('/resultados/<int:eleccion_id>/print')
 @login_required
@@ -735,8 +778,8 @@ def edit_password_user(user_id):
     return render_template('edit_user_password.html', form=form, user=user)
 
 
-
-@app.route('/edit_user_identificacion/<int:user_id>', methods=['GET', 'POST']) # Ruta para que el admin edite la identificación de otros usuarios
+# Ruta para que el admin edite la identificación
+@app.route('/edit_user_identificacion/<int:user_id>', methods=['GET', 'POST']) 
 @login_required
 def edit_identificacion_user(user_id):
     if current_user.role != UserRole.ADMIN:
@@ -765,16 +808,16 @@ def edit_identificacion_user(user_id):
                 old_identificacion=old_identificacion,
                 new_identificacion=nueva_identificacion
             )
+            
             db.session.add(log)
-            print(f"Antes de commit: log={log}")
             db.session.commit()
-            print("Commit exitoso")
             flash('Identificación del usuario actualizada exitosamente.', 'success')
-            return redirect(url_for('manage_users'))
+            return redirect(url_for('listar_usuarios'))
         except Exception as e:
             db.session.rollback()
-            print(f"Error al actualizar identificación y guardar log: {e}")
             flash(f'Ocurrió un error al actualizar: {str(e)}', 'danger')
+            
+    return render_template('edit_user_identificacion.html', form=form, user=user)
 
 # Ruta para editar una candidatura
 @app.route('/candidatura/<int:candidatura_id>/editar', methods=['GET', 'POST'])
@@ -971,10 +1014,153 @@ def test_create_log():
         return f"Error al crear log: {str(e)}"
 
 #------------------------------------------
-
-
-
+#            EXPORT
 #------------------------------------------
+
+@app.route('/export_logs_excel') # Ruta para exportar los logs a Excel
+@login_required
+def export_logs_excel():
+    if current_user.role != UserRole.ADMIN:
+        flash("Acceso denegado. Solo el administrador puede exportar los registros.", "danger")
+        return redirect(url_for('dashboard'))
+
+    logs = IdentificationChangeLog.query.order_by(IdentificationChangeLog.timestamp.desc()).all()
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Cambios de Identificación"
+
+    # Encabezados
+    headers = ["#", "Usuario que hizo el cambio", "Usuario afectado", "Identificación anterior", "Identificación nueva", "Fecha y Hora"]
+    ws.append(headers)
+
+    # Filas
+    for index, log in enumerate(logs, start=1):
+        ws.append([
+            index,
+            log.changed_by.username,
+            log.affected_user.username,
+            log.old_identificacion,
+            log.new_identificacion,
+            log.timestamp.strftime('%d/%m/%Y %H:%M:%S')
+        ])
+
+    # Guardar en memoria
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name="cambios_identificacion.xlsx",
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+
+
+
+
+@app.route('/export_logs_pdf')
+@login_required
+def export_logs_pdf():
+    if current_user.role != UserRole.ADMIN:
+        flash("Acceso denegado. Solo el administrador puede exportar los registros.", "danger")
+        return redirect(url_for('dashboard'))
+
+    logs = IdentificationChangeLog.query.order_by(IdentificationChangeLog.timestamp.desc()).all()
+    buffer = BytesIO()
+    c = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
+
+   # Logo
+    logo_path = os.path.join(app.root_path, 'static/images', 'logo.png')
+    if os.path.exists(logo_path):
+        c.drawImage(
+        logo_path,
+        x=2 * cm,
+        y=height - 4.5 * cm,
+        width=3 * cm,
+        height=3 * cm,
+        preserveAspectRatio=True,
+        mask='auto'
+    )
+
+# Título alineado con el logo (justificado a la derecha del logo)
+    c.setFont("Helvetica-Bold", 16)
+    c.drawString(6 * cm, height - 2.5 * cm, "Historial de Cambios de Identificación")
+
+# Subtítulo institucional bajo el título principal
+    c.setFont("Helvetica-Oblique", 10)
+    c.setFillColor(colors.darkgray)
+    c.drawString(6 * cm, height - 3.2 * cm, "Sistema de Votación Electrónica - USTA ")
+    c.setFillColor(colors.black)  # Restablece color para lo demás
+
+
+    #  Luego inicia la tabla
+    c.setFont("Helvetica", 9)
+    y = height - 5.2 * cm
+    line_height = 1 * cm
+    headers = ["#", "Cambió", "Afectado", "Antes", "Ahora", "Fecha y Hora"]
+    col_positions = [1.5, 3.5, 7.0, 10.0, 12.5, 15.0]
+
+    def draw_table_header(y_pos):
+        c.setFillColor(colors.whitesmoke)
+        c.rect(1.5 * cm, y_pos - 0.3 * cm, width - 3 * cm, 0.7 * cm, fill=1)
+        c.setFillColor(colors.black)
+        c.setFont("Helvetica-Bold", 9)
+        for i, header in enumerate(headers):
+            c.drawString(col_positions[i] * cm, y_pos, header)
+
+    def draw_footer(page_num):
+        c.setFont("Helvetica-Oblique", 8)
+        c.setFillColor(colors.grey)
+        c.drawRightString(width - 2 * cm, 1.5 * cm, f"Página {page_num}")
+        c.drawString(2 * cm, 1.5 * cm, "Generado por el Sistema de Votación - USTA - Tunja 2025")
+
+    page_num = 1
+    draw_table_header(y)
+    y -= line_height
+
+    c.setFont("Helvetica", 9)
+    for i, log in enumerate(logs, start=1):
+        if y < 3 * cm:
+            draw_footer(page_num)
+            c.showPage()
+            page_num += 1
+            y = height - 5.2 * cm
+            draw_table_header(y)
+            y -= line_height
+
+        if i % 2 == 0:
+            c.setFillColorRGB(0.95, 0.95, 0.95)
+            c.rect(1.5 * cm, y - 0.3 * cm, width - 3 * cm, 0.7 * cm, fill=1)
+        c.setFillColor(colors.black)
+
+        row = [
+            str(i),
+            log.changed_by.username,
+            log.affected_user.username,
+            log.old_identificacion,
+            log.new_identificacion,
+            log.timestamp.strftime('%d/%m/%Y %H:%M')
+        ]
+        for j, text in enumerate(row):
+            c.drawString(col_positions[j] * cm, y, text)
+        y -= line_height
+
+    draw_footer(page_num)
+    c.showPage()
+    c.save()
+    buffer.seek(0)
+
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name="cambios_identificacion.pdf",
+        mimetype='application/pdf'
+    )
+
+
 
 if __name__ == '__main__':
     app.run(debug=True) 

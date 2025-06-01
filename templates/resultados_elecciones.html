@@ -51,13 +51,16 @@
                                         ">{{ eleccion.estado | capitalize }}</span>
                                     </p>
 
-                                    {% if eleccion.resultados and eleccion.resultados|length > 0 %}
-                                    <p class="card-text mb-2 text-success">
-                                        <i class="bi bi-award-fill me-1"></i><strong>Ganador:</strong> {{ eleccion.resultados[0].candidato }}
-                                    </p>
+                                    {% if eleccion.resultados_filtrados %}
+                                        <p class="card-text mb-2 {{ 'text-success' if eleccion.estado == 'finalizada' else 'text-primary' }}">
+                                            <i class="bi bi-award-fill me-1"></i>
+                                            <strong>{{ 'Ganador final:' if eleccion.estado == 'finalizada' else 'Ganador parcial:' }}</strong>
+                                            {{ eleccion.resultados_filtrados[0].username | capitalize }}
+                                        </p>
                                     {% else %}
-                                    <p class="card-text mb-2 text-muted fst-italic">No hay resultados disponibles.</p>
+                                        <p class="card-text mb-2 text-muted fst-italic">No hay resultados disponibles.</p>
                                     {% endif %}
+
                                 </div>
                                 <a href="{{ url_for('ver_resultado_eleccion', eleccion_id=eleccion.id) }}"
                                    class="btn btn-primary mt-auto" title="Ver resultados de {{ eleccion.nombre }}">

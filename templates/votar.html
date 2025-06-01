@@ -25,69 +25,70 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-3">
-    <div class="card shadow-lg w-75 mx-auto">
-        <div class="card-header bg-blue-translucent text-white text-center">
-            <h4 class="mb-0"><i class="bi bi-person-check-fill me-2"></i>Votar en: {{ eleccion.nombre }}</h4>
-        </div>
-        <div class="card-body">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div id="flash-messages">
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-            {% endwith %}
+<div style="padding: 0.8rem;">
+    <div class="container-fluid mt-3">
+        <div class="card shadow-lg w-75 mx-auto">
+            <div class="card-header bg-blue-translucent text-white text-center">
+                <h4 class="mb-0"><i class="bi bi-person-check-fill me-2"></i>Votar en: {{ eleccion.nombre }}</h4>
+            </div>
+            <div class="card-body">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div id="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                {% endwith %}
 
-            <form method="POST">
-                {{ form.hidden_tag() }}
-                <div class="row">
-                    {% for c in candidatos %}
-                    {% set nombre_completo = (c.user.profile.nombres or c.user.username) ~ ' ' ~ (c.user.profile.apellidos or '') %}
-                    <div class="col-md-6 mb-4">
-                        <div class="card candidato-card shadow-sm p-3">
-                            <div class="d-flex align-items-center">
-                                <img src="{% if c.user.profile and c.user.profile.profile_picture %}
-                                            {{ url_for('uploaded_file', filename=c.user.profile.profile_picture) }}
-                                          {% else %}
-                                            {{ url_for('uploaded_file', filename='default.jpg') }}
-                                          {% endif %}"
-                                     alt="Foto"
-                                     class="rounded-circle me-3"
-                                     onclick="showImageInModal(this.src, '{{ nombre_completo }}')">
-                                <div>
-                                    <h5 class="mb-1"><i class="bi bi-person-circle me-1"></i>{{ nombre_completo }}</h5>
-                                    <p class="mb-1 text-muted">@{{ c.user.username }}</p>
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    <div class="row">
+                        {% for c in candidatos %}
+                        {% set nombre_completo = (c.user.profile.nombres or c.user.username) ~ ' ' ~ (c.user.profile.apellidos or '') %}
+                        <div class="col-md-6 mb-4">
+                            <div class="card candidato-card shadow-sm p-3">
+                                <div class="d-flex align-items-center">
+                                    <img src="{% if c.user.profile and c.user.profile.profile_picture %}
+                                                {{ url_for('uploaded_file', filename=c.user.profile.profile_picture) }}
+                                            {% else %}
+                                                {{ url_for('uploaded_file', filename='default.jpg') }}
+                                            {% endif %}"
+                                        alt="Foto"
+                                        class="rounded-circle me-3"
+                                        onclick="showImageInModal(this.src, '{{ nombre_completo }}')">
+                                    <div>
+                                        <h5 class="mb-1"><i class="bi bi-person-circle me-1"></i>{{ nombre_completo }}</h5>
+                                        <p class="mb-1 text-muted">@{{ c.user.username }}</p>
+                                    </div>
+                                </div>
+                                <p class="mt-3 mb-2"><i class="bi bi-megaphone me-1 text-primary"></i><strong>Propuesta:</strong> {{ c.propuesta }}</p>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="candidatura_id" value="{{ c.id }}" id="candidato{{ c.id }}" required>
+                                    <label class="form-check-label" for="candidato{{ c.id }}">
+                                        Seleccionar
+                                    </label>
                                 </div>
                             </div>
-                            <p class="mt-3 mb-2"><i class="bi bi-megaphone me-1 text-primary"></i><strong>Propuesta:</strong> {{ c.propuesta }}</p>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="candidatura_id" value="{{ c.id }}" id="candidato{{ c.id }}" required>
-                                <label class="form-check-label" for="candidato{{ c.id }}">
-                                    Seleccionar
-                                </label>
-                            </div>
                         </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
-                </div>
-                <button type="submit" class="btn btn-success w-100 mt-3">
-                    <i class="bi bi-check2-square me-1"></i> Votar
-                </button>
-            </form>
+                    <button type="submit" class="btn btn-success w-100 mt-3">
+                        <i class="bi bi-check2-square me-1"></i> Votar
+                    </button>
+                </form>
 
-            <a href="{{ url_for('votaciones_disponibles') }}" class="btn btn-outline-secondary mt-3">
-                <i class="bi bi-arrow-left-circle me-1"></i> Volver a votaciones
-            </a>
+                <a href="{{ url_for('votaciones_disponibles') }}" class="btn btn-outline-secondary mt-3">
+                    <i class="bi bi-arrow-left-circle me-1"></i> Volver a votaciones
+                </a>
+            </div>
         </div>
     </div>
 </div>
-
 <!-- Modal para foto -->
 <div class="modal fade" id="profileImageModal" tabindex="-1" aria-labelledby="profileImageModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">

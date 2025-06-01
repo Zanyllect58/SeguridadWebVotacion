@@ -13,17 +13,30 @@
     />
 
     <style>
-      body {
+      body, html {
         background-color: #f8f9fa;
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        padding-top: 34px; /* Altura navbar */
+        height: 100%;
       }
 
+      nav.navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1050; /* Por encima del sidebar */
+    } 
+
       .sidebar {
+        position: fixed;          /* Hace que el sidebar quede fijo */
+        top: 56px;                /* Ajusta según la altura de tu navbar */
+        left: 0;
         min-width: 250px;
         max-width: 300px;
-        min-height: 100vh;
-
-        background-color: rgba(33,37,41,0.95); 
+        height: calc(100vh - 56px); /* Altura total menos navbar */
+        
+        background-color: rgba(33,37,41,0.95);
         color: #ffffff;
         display: flex;
         flex-direction: column;
@@ -31,7 +44,9 @@
         border-right: 1px solid rgba(255, 255, 255, 0.1);
         overflow-y: auto;
         
+        z-index: 1040;            /* Para que quede arriba de otros elementos */
       }
+
 
       .sidebar h5 {
         color: #fff;
@@ -107,7 +122,7 @@
 
       main {
         flex-grow: 1;
-        
+        margin-left: 300px; /* Deja espacio para el sidebar fijo */
       }
 
       .profile-picture {
@@ -139,20 +154,19 @@
       }
 
       .background-image {
-        position: absolute;
-        padding: 5rem;
-        top: 0;
-        left: 0;
-        height: 100%;
-        width: 100%;
+        position: fixed;
+        top: 56px; /* Altura navbar */
+        left: 300px; /* Ancho del sidebar */
+        width: calc(100% - 300px);
+        height: calc(100vh - 56px);
         background-image: url("{{ url_for('static', filename='images/fondo.jpg') }}");
         background-size: cover;
         background-position: center;
         z-index: 0;
         background-repeat: no-repeat;
-        border: none;
-        outline: none;
+        padding: 5rem;
       }
+
 
       .overlay-card {
         position: relative;
@@ -174,38 +188,41 @@
         class="container-fluid d-flex justify-content-between align-items-center"
       >
         <!-- Info usuario a la izquierda -->
-        <div
-          class="d-flex align-items-center bg-dark bg-opacity-50 rounded px-2 py-1"
-        >
-          
-
+        <div class="d-flex align-items-center bg-dark bg-opacity-50 rounded px-2 py-1">
           {% set profile_pic = current_user.profile.profile_picture if
           current_user.profile and current_user.profile.profile_picture else
           'default.jpg' %}
-          <img
-            src="{{ url_for('uploaded_file', filename=profile_pic) }}"
-            alt="Foto de perfil"
-            class="rounded-circle navbar-profile-img shadow-sm border border-light"
-          />
-          <div class="ms-3 text-white">
-            <div class="fw-semibold">{{ current_user.username or current_user.profile.name }}</div>
-            <div class="small text-capitalize text-light-emphasis">
-              {{ current_user.role.value }}
+          <a href="{{ url_for('dashboard') }}">
+            <img
+              src="{{ url_for('uploaded_file', filename=profile_pic) }}"
+              alt="Foto de perfil"
+              class="rounded-circle navbar-profile-img shadow-sm border border-light"
+            />
+          </a>
+            <div class="ms-3 text-white">
+              <div class="fw-semibold">{{ current_user.username or current_user.profile.name }}</div>
+              <div class="small text-capitalize text-light-emphasis">
+                {{ current_user.role.value }}
+              </div>
             </div>
-          </div>
+            
+
         </div>
-<!-- Botón para colapsar en móvil -->
-          <button
-            class="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarActions"
-            aria-controls="navbarActions"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
-            <span class="bi bi-list"> </span>
-          </button>
+
+      <!-- Botón para colapsar en móvil -->
+        <button
+        class="btn btn-outline-light d-lg-none"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarActions"
+        aria-controls="navbarActions"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+        onclick="toggleSidebar()"
+      >
+        <i class="bi bi-list"></i> Menú
+      </button>
+
         <!-- Menú a la derecha -->
         <div
           class="collapse navbar-collapse justify-content-end"
@@ -362,11 +379,6 @@
                   class="btn btn-outline-info"
                   ><i class="bi bi-card-checklist"></i> Cambios
                   Identificación</a
-                >
-                <a
-                  href="#"
-                  class="btn btn-outline-info"
-                  ><i class="bi bi-journal-text"></i> Cambios Elecciones</a
                 >
               </div>
             </div>
@@ -572,13 +584,13 @@
         </div>
         {% endif %} {% endwith %}
         <!-- Aquí va el contenido principal -->
-              <div class=" position-relative w-100 background-image">
+              <div class=" background-image">
           <div class="card overlay-card text-center mx-auto shadow-lg mt-5 p-4">
             <h2 class="fw-bold">Sistema de Votaciones</h2>
             <p class="mb-0">Universidad Santo Tomás</p>
             <hr />
             <p>
-              Bienvenido, {{ current_user.username or current_user.profile.name }}.
+              Bienvenid@, {{ current_user.username or current_user.profile.name }}.
               <br />
               Puedes gestionar tus elecciones o visualizar resultados según tu rol: <strong>{{ current_user.role.value|capitalize }}</strong>.
             </p>
@@ -594,6 +606,14 @@
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+
+      function toggleSidebar() {
+        const sidebar = document.getElementById("sidebar");
+        if (sidebar) {
+          sidebar.classList.toggle("show");  // o una clase personalizada para mostrarlo
+        }
+      }
+      // Cierra automático de alertas
       window.addEventListener("DOMContentLoaded", () => {
         // Cierra automáticamente las alertas después de 6 segundos
         const alerts = document.querySelectorAll("#flash-messages .alert");

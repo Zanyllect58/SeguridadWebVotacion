@@ -5,89 +5,94 @@
 {% block styles %}
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 <style>
-    .card {
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        border: 2px solid black;
-        border-radius: 8px;
-    }
-
-    .card h2 {
-        margin-bottom: 20px;
-    }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 10px;
-        background: white;
-    }
-
-    thead {
-        background-color: #007bff;
-        color: white;
-    }
-
-    th, td {
-        padding: 12px 15px;
-        border: 1px solid #ddd;
-        text-align: left;
-    }
-
-    tbody tr:hover {
-        background-color: #f1f1f1;
-    }
-
-    #noData {
-        text-align: center;
-        color: #999;
-        margin-top: 15px;
-    }
+.bg-blue-translucent {
+    background-color: rgba(0, 51, 102, 0.85);
+    backdrop-filter: blur(3px);
+    border-radius: 0.25rem 0.25rem 0 0;
+    color: white;
+}
+.card-custom {
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+    border-radius: 0.25rem;
+    overflow: hidden;
+}
+.table-custom thead {
+    background-color: #003366;
+    color: white;
+}
+.table-custom tbody tr:hover {
+    background-color: #e9f0fb;
+}
+#noData {
+    text-align: center;
+    color: #666;
+    margin-top: 20px;
+    font-style: italic;
+}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container mt-2">
-  <div class="card w-100 mx-auto">
-    <div class="card-body">
-      <h2 class="mb-4"><i class="bi bi-clock-history me-2"></i>Logs de Cambios de Identificación</h2>
+<div style="padding: 0.8rem;">
+  <div class="container mt-4" style="max-width: 900px;">
+      <div class="card card-custom mx-auto shadow-sm">
+          <div class="card-header bg-blue-translucent text-center">
+              <h4 class="mb-0">
+                  <i class="bi bi-clock-history me-2"></i> Logs de Cambios de Identificación
+              </h4>
+          </div>
+          <div class="mt-4 p-2 d-flex justify-content-start gap-2">
+            <a href="{{ url_for('export_logs_excel') }}" class="btn btn-success me-2">
+                <i class="bi bi-file-earmark-excel me-1"></i> Exportar a CSV
+            </a>
+            <a href="{{ url_for('export_logs_pdf') }}" class="btn btn-danger">
+                <i class="bi bi-file-earmark-pdf me-1"></i> Exportar a PDF
+            </a>
+          </div>
+          <div class="card-body p-4">
+            
+              {% if logs %}
+              <div class="table-responsive">
+                  <table class="table table-striped table-bordered table-custom mb-0">
+                      <thead>
+                          <tr>
+                              <th><i class="bi bi-calendar3 me-1"></i> Fecha y Hora</th>
+                              <th><i class="bi bi-person-check me-1"></i> Usuario que Cambió</th>
+                              <th><i class="bi bi-person-fill me-1"></i> Usuario Afectado</th>
+                              <th><i class="bi bi-card-text me-1"></i> Identificación Antigua</th>
+                              <th><i class="bi bi-card-text me-1"></i> Identificación Nueva</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          {% for log in logs %}
+                          <tr>
+                              <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                              <td>{{ log.changed_by.username }}</td>
+                              <td>{{ log.affected_user.username }}</td>
+                              <td>{{ log.old_identificacion }}</td>
+                              <td>{{ log.new_identificacion }}</td>
+                          </tr>
+                          {% endfor %}
+                      </tbody>
+                  </table>
+              </div>
+              {% else %}
+              <div id="noData">No hay registros de cambios de identificación.</div>
+              {% endif %}
 
-      {% if logs %}
-      <table class="table table-striped table-bordered">
-        <thead>
-          <tr>
-            <th>Fecha y Hora</th>
-            <th>Usuario que Cambió</th>
-            <th>Usuario Afectado</th>
-            <th>Identificación Antigua</th>
-            <th>Identificación Nueva</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for log in logs %}
-          <tr>
-            <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-            <td>{{ log.changed_by.username }}</td>
-            <td>{{ log.affected_user.username }}</td>
-            <td>{{ log.old_identificacion }}</td>
-            <td>{{ log.new_identificacion }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      {% else %}
-      <div id="noData">No hay registros de cambios de identificación.</div>
-      {% endif %}
-
-      <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary mt-3">
-        <i class="bi bi-arrow-left"></i> Volver
-      </a>
-    </div>
+              <div class="mt-4 d-flex justify-content-start">
+                  <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                      <i class="bi bi-arrow-left-circle me-2"></i> Volver al Dashboard
+                  </a>
+              </div>
+          </div>
+      </div>
   </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-  // Aquí puedes añadir lógica si quieres interactividad
+  // Puedes añadir lógica JS aquí si la necesitas
 </script>
 {% endblock %}

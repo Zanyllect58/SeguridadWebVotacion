@@ -2,6 +2,22 @@
 {% block title %}Resultados Elección{% endblock %}
 {% block styles %}
 <style>
+    .card-candidato {
+        transition: 0.3s;
+        border-radius: 15px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    .card-candidato:hover {
+        transform: scale(1.02);
+        box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+    }
+    .foto-candidato {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-bottom: 1px solid #ddd;
+    }
     @media print {
         .no-print, .chart-container, h2, h5 {
             display: none !important;
@@ -13,109 +29,194 @@
             border: 1px solid #000 !important;
         }
     }
-    
+
+    .chart-container canvas {
+        max-width: 600px;
+        max-height: 600px;
+        margin: 0 auto;
+        display: block;
+    }
+
+    .bg-blue-translucent {
+        background-color: rgba(0, 51, 102, 0.8);
+        backdrop-filter: blur(2px);
+    }
 </style>
 {% endblock %}
+
 {% block content %}
-<div class="container mt-2">
-    <div class="text-center mb-4">
-        <h2>📊 Resultados de: <span class="text-primary">{{ eleccion.nombre }}</span></h2>
-        {% if resultados %}
-            <h5 class="text-success">
-                🥇 Ganador: <strong>{{ resultados[0].candidato }}</strong> con <strong>{{ resultados[0].votos }}</strong> voto(s)
-            </h5>
-        {% else %}
-            <div class="alert alert-warning">No hay resultados disponibles para esta elección.</div>
-        {% endif %}
-    </div>
+<div style="padding: 0.8rem;">
+    <div class="container-fluid mt-2">
+        <div class="card shadow w-85 mx-auto">
+            <div class="card-header bg-blue-translucent text-white text-center">
+                <h4 class="mb-0"><i class="bi bi-bar-chart-line me-2"></i>Resultados de: {{ eleccion.nombre }}</h4>
+            </div>
+            <div class="card-body">
 
-    {% if resultados %}
-    <div id="tabla-a-exportar">
-        <table class="table table-bordered table-sm align-middle">
-            <thead class="table-dark">
-                <tr>
-                    <th>#</th>
-                    <th>Nombre</th>
-                    <th>Usuario</th>
-                    <th>Propuesta</th>
-                    <th>Votos</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for c in resultados %}
-                <tr class="{% if loop.first %}table-warning fw-bold{% endif %}">
-                    <td>{{ loop.index }}</td>
-                    <td>{{ c.candidato }}</td>
-                    <td>@{{ c.username }}</td>
-                    <td>{{ c.propuesta }}</td>
-                    <td><strong>{{ c.votos }}</strong></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+                <div class="text-center mb-3">
+                    {% if resultados %}
+                        <h5 class="text-success">
+                            <i class="bi bi-trophy-fill text-warning me-1"></i>Ganador: <strong>{{ resultados[0].candidato }}</strong> con <strong>{{ resultados[0].votos }}</strong> voto(s)
+                        </h5>
+                    {% else %}
+                        <div class="alert alert-warning"><i class="bi bi-exclamation-triangle-fill me-2"></i>No hay resultados disponibles para esta elección.</div>
+                    {% endif %}
+                </div>
 
-    <div class="chart-container mt-5 no-print">
-        <h6 class="text-center">📈 Votos por Candidato (Gráfico de Barras)</h6>
-        <canvas id="barChart" height="100"></canvas>
-    </div>
-    {% endif %}
+                {% if resultados %}
+                    <div class="mb-4">
+                        <h5 class="text-center"><i class="bi bi-table me-2"></i>Tabla de Resultados</h5>
+                        <table class="table table-bordered table-striped text-center">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th><i class="bi bi-person-bounding-box"></i> Foto</th>
+                                    <th><i class="bi bi-person-fill"></i> Nombre</th>
+                                    <th><i class="bi bi-at"></i> Usuario</th>
+                                    <th><i class="bi bi-lightbulb-fill"></i> Propuesta</th>
+                                    <th><i class="bi bi-check2-square"></i> Votos</th>
+                                    <th><i class="bi bi-pie-chart-fill"></i> Porcentaje</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for c in resultados %}
+                                <tr>
+                                    <td>
+                                        {% set perfil = c.get('profile') %}
+                                        <img src="{{ url_for('uploaded_file', filename=perfil.profile_picture if perfil and perfil.profile_picture else 'default.jpg') }}"
+                                            alt="Foto"
+                                            class="rounded-circle"
+                                            style="width: 40px; height: 40px; object-fit: cover; cursor: pointer;"
+                                            onclick="showImageInModal(this.src)">
+                                    </td>
+                                    <td>{{ c.candidato }}</td>
+                                    <td>@{{ c.username }}</td>
+                                    <td>{{ c.propuesta }}</td>
+                                    <td>{{ c.votos }}</td>
+                                    <td>
+                                        {% if total_votos > 0 %}
+                                            {{ ((c.votos / total_votos) * 100) | round(2) }}%
+                                        {% else %}
+                                            0%
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
 
-    <div class="no-print text-center mt-5">
-        <a href="{{ url_for('resultados_elecciones') }}" class="btn btn-secondary">← Volver</a>
-        <button onclick="imprimirTabla()" class="btn btn-success">🖨️ Exportar solo tabla</button>
+                    <h5 class="text-center"><i class="bi bi-calculator me-2"></i>Total de votos: <strong>{{ total_votos }}</strong></h5>
+
+                    {% if empate %}
+                        <div class="alert alert-info text-center mt-3">
+                            <i class="bi bi-exclamation-diamond-fill me-2"></i>Hubo un empate entre candidatos.
+                        </div>
+                    {% endif %}
+
+                    <div class="chart-container mt-5 no-print">
+                        <h6 class="text-center"><i class="bi bi-bar-chart-fill me-2"></i>Votos por Candidato (Gráfico de Barras)</h6>
+                        <canvas id="barChart"></canvas>
+                    </div>
+
+                    <div class="chart-container mt-4 no-print">
+                        <h6 class="text-center"><i class="bi bi-pie-chart-fill me-2"></i>Distribución de Votos (Gráfico de Pastel)</h6>
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                {% endif %}
+
+                <div class="no-print text-center mt-5">
+                    <a href="{{ url_for('resultados_elecciones') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Volver</a>
+                    <a href="{{ url_for('ver_resultado_eleccion_print', eleccion_id=eleccion.id) }}" class="btn btn-success">
+                        <i class="bi bi-printer-fill me-1"></i>Versión para imprimir
+                    </a>
+                </div>
+
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- Chart.js Script -->
+<!-- Modal para ampliar imagen -->
+<div class="modal fade" id="profileImageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h6 class="modal-title"><i class="bi bi-person-circle me-2"></i>Foto del Candidato</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalProfileImage" class="img-fluid rounded shadow" src="" alt="Imagen Ampliada">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const ctx = document.getElementById('barChart').getContext('2d');
+    function showImageInModal(src) {
+        document.getElementById('modalProfileImage').src = src;
+        const modal = new bootstrap.Modal(document.getElementById('profileImageModal'));
+        modal.show();
+    }
 
-        new Chart(ctx, {
+    document.addEventListener("DOMContentLoaded", function () {
+        const labels = [{% for c in resultados %}"{{ c.candidato }}"{% if not loop.last %}, {% endif %}{% endfor %}];
+        const votos = [{% for c in resultados %}{{ c.votos }}{% if not loop.last %}, {% endif %}{% endfor %}];
+
+        const barCtx = document.getElementById('barChart').getContext('2d');
+        new Chart(barCtx, {
             type: 'bar',
             data: {
-                labels: [{% for c in resultados %}"{{ c.candidato }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+                labels: labels,
                 datasets: [{
                     label: 'Votos',
-                    data: [{% for c in resultados %}{{ c.votos }}{% if not loop.last %}, {% endif %}{% endfor %}],
-                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
+                    data: votos,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
                     borderWidth: 1
                 }]
             },
             options: {
                 responsive: true,
                 plugins: {
-                    legend: { display: false },
-                    tooltip: { enabled: true }
+                    legend: { display: false }
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
                         precision: 0,
-                        ticks: {
-                            stepSize: 1
-                        }
+                        ticks: { stepSize: 1 }
+                    }
+                }
+            }
+        });
+
+        const pieCtx = document.getElementById('pieChart').getContext('2d');
+        new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: votos,
+                    backgroundColor: [
+                        '#FF6384', '#36A2EB', '#FFCE56',
+                        '#8BC34A', '#FF9800', '#9C27B0'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
                     }
                 }
             }
         });
     });
 
-    function imprimirTabla() {
-        const contenido = document.getElementById('tabla-a-exportar').innerHTML;
-        const ventana = window.open('', '', 'height=700,width=900');
-        ventana.document.write('<html><head><title>Exportar Resultados</title>');
-        ventana.document.write('<style>table { width: 100%; border-collapse: collapse; } table, th, td { border: 1px solid black; padding: 8px; text-align: center; }</style>');
-        ventana.document.write('</head><body>');
-        ventana.document.write(contenido);
-        ventana.document.write('</body></html>');
-        ventana.document.close();
-        ventana.print();
-    }
 </script>
-
-
 {% endblock %}
